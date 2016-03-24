@@ -35,7 +35,7 @@
 using namespace std;
 
 enum {
-	Regex_type = 0, A_type, B_type, C_type, Regex_start, A_start, e_type, sign_type
+	Regex_type = 0, A_type, B_type, C_type, Regex_start, A_start, e_type, sign_type, eof_type
 };
 
 
@@ -55,6 +55,7 @@ struct stack_element
 {
 	RE_tree_node *node_inserted;
 	int type;
+	bool num_inserted;
 };
 
 
@@ -70,17 +71,17 @@ public:
 	typedef void (*insert_func)(int type, RE_tree_node *p, char num);
 	RE_tree();
 	void input_regex();
-	void push_element();
-	void backtrack();
 	void generate_tree();
-
-	stack<stack_element> record;
+	void print_tree(RE_tree_node *p);
+	stack<stack_element *> record;
 	set<char> terminator;
 	string regex;
 	RE_tree_node *root;
 	vector<insert_func> insert;
 private:
-
+	RE_tree_node *get_next_node(RE_tree_node *p);
+	RE_tree_node *backtrack(RE_tree_node *p, string::iterator &s, char &type_current);
+	int push_element(RE_tree_node *p, string::iterator &s, char &type_current);
 };
 
 
