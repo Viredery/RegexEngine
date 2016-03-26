@@ -118,6 +118,8 @@ RE_tree::RE_tree()
 	insert.push_back(insert_production_six);
 
 	root = new RE_tree_node(Regex_start, NULL);
+
+	regex_tree = new Node;
 }
 
 void RE_tree::input_regex()
@@ -135,14 +137,11 @@ void RE_tree::generate_tree()
 		type_current = *pos_current;
 	else
 		type_current = e_type;
-int i=1;
 	while(true)
 	{
 		if(terminator.find(node->type) != terminator.end() && node->type == eof_type)
-		{
 			node = get_next_node(node);
-		}
-		else if(terminator.find(node->type) != terminator.end() && type_current == node->type)//xiugai
+		else if(terminator.find(node->type) != terminator.end() && type_current == node->type)
 		{
 			record.top()->num_inserted = true;
 			node = get_next_node(node);
@@ -157,10 +156,10 @@ int i=1;
 						type_current = e_type;
 				}
 				else
-				{
 					type_current = eof_type;
-				}
 			}
+			else
+				type_current = eof_type;
 		}
 		else if(terminator.find(node->type) != terminator.end() && type_current != node->type)
 		{
@@ -173,13 +172,9 @@ int i=1;
 			node = node->lch_node;
 		}
 		if(node == NULL && pos_current == pos_end)
-		{
 			return;
-		}
 		else if(node == NULL && pos_current != pos_end)
-		{
 			node = backtrack(node, pos_current, type_current);
-		}
 	}
 }
 
@@ -195,6 +190,7 @@ int RE_tree::push_element(RE_tree_node *p, string::iterator &s, char &type_curre
 				type_current = *s;
 			else
 				type_current = e_type;
+			record.top()->num_inserted = false;
 		}
 		record.top()->type = 2;
 		return 2;
@@ -213,16 +209,23 @@ RE_tree_node *RE_tree::backtrack(RE_tree_node *p, string::iterator &s, char &typ
 {
 	while((!record.empty()) && record.top()->type == 2)
 	{
-		if(record.top()->num_inserted == true)
+		while((!record.empty()) && record.top()->type == 2)
 		{
-			s--;
-			if(terminator.find(*s) != terminator.end())
-				type_current = *s;
-			else
-				type_current = e_type;
+			if(record.top()->num_inserted == true)
+			{
+				s--;
+				if(terminator.find(*s) != terminator.end())
+					type_current = *s;
+
+				else
+					type_current = e_type;
+			}
+			record.pop();
 		}
-		record.pop();
+		while((!record.empty()) && (record.top()->node_inserted->type == A_start || record.top()->node_inserted->type == Regex_start))
+			record.pop();
 	}
+
 	if(record.empty())
 		return NULL;
 	else
@@ -234,9 +237,9 @@ RE_tree_node *RE_tree::get_next_node(RE_tree_node *p)
 		return NULL;
 	if(p->bro_node != NULL)
 		return p->bro_node;
-	cout<<p->type<<endl;
 	return get_next_node(p->prt_node);
 }
+/*
 void RE_tree::print_tree(RE_tree_node *p)
 {
 	if(p == NULL)
@@ -248,10 +251,85 @@ void RE_tree::print_tree(RE_tree_node *p)
 		print_tree(p->bro_node);
 	}
 }
+*/
+void RE_tree::simplification(RE_tree_node *root, Node *node)
+{
+	if(root->type == A_start)
+	{
+		if(root->bro_node->lch_node->type == eof_type)
+			simplification(root->lch_node, node);
+		else
+		{
+			node->value = ALT;
+			Node *left = new Node;
+			Node *right = new Node;
+			node->left = left;
+			node->right = right;
+			simplification(root->lch_node, left);
+			simplification(root->bro_node->lch_node->bro_node, right);
+		}
+	}
+	else if(root->type == B_type)
+	{
+		if(root->bro_node->lch_node->type == eof_type)
+			simplification(root->lch_node, node);
+		else
+		{
+			node->value = CONCAT;
+			Node *left = new Node;
+			Node *right = new Node;
+			node->left = left;
+			node->right = right;
+			simplification(root->lch_node, left);
+			simplification(root->bro_node->lch_node, right);
+		}
+	}
+	else if(root->type == C_type)
+	{
+		if(root->bro_node == NULL)
+			simplification(root->lch_node, node);
+		else
+		{
+			node->value = CLOSURE;
+			Node *left = new Node;
+			node->left = left;
+			node->right = NULL;
+			simplification(root->lch_node, left);
+		}
+	}
+	else if(root->type == '(')
+		simplification(root->bro_node, node);
+	else if(root->type == e_type)
+	{
+		node->value = root->value;
+		node->left = node->right = NULL;
+	}
+	else
+		simplification(root->lch_node, node);
+}
+/*
+void RE_tree::print_tree(Node *node)
+{
+	if(node == NULL)
+		cout<<"NULL ";
+	else
+	{
+		cout<<(int)node->value<<" ";
+		print_tree(node->left);
+		print_tree(node->right);
+	}
+}
+*/
+Node *RE_tree::get_re_tree()
+{
+	input_regex();
+	generate_tree();
+	simplification(root, regex_tree);
+	return regex_tree;
+}
 int main()
 {
 	RE_tree re;
-	re.input_regex();
-	re.generate_tree();
-	re.print_tree(re.root);
+	cout<<(int)re.get_re_tree()->value<<endl;
 }
+
