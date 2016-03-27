@@ -143,7 +143,7 @@ void RE_tree::generate_tree()
 			node = get_next_node(node);
 		else if(terminator.find(node->type) != terminator.end() && type_current == node->type)
 		{
-			record.top()->num_inserted = true;
+			record.top()->num_inserted++;
 			node = get_next_node(node);
 			if(pos_current != pos_end)
 			{
@@ -162,9 +162,7 @@ void RE_tree::generate_tree()
 				type_current = eof_type;
 		}
 		else if(terminator.find(node->type) != terminator.end() && type_current != node->type)
-		{
 			node = backtrack(node, pos_current, type_current);
-		}
 		else if(terminator.find(node->type) == terminator.end())
 		{
 			int type = push_element(node, pos_current, type_current);
@@ -183,14 +181,14 @@ int RE_tree::push_element(RE_tree_node *p, string::iterator &s, char &type_curre
 	stack_element *element = new stack_element;
 	if((!record.empty()) && record.top()->node_inserted == p && record.top()->type == 1)
 	{
-		if(record.top()->num_inserted == true)
+		while(record.top()->num_inserted > 0)
 		{
 			s--;
 			if(terminator.find(*s) != terminator.end())
 				type_current = *s;
 			else
 				type_current = e_type;
-			record.top()->num_inserted = false;
+			record.top()->num_inserted--;
 		}
 		record.top()->type = 2;
 		return 2;
@@ -199,7 +197,7 @@ int RE_tree::push_element(RE_tree_node *p, string::iterator &s, char &type_curre
 	{
 		element->node_inserted = p;
 		element->type = 1;
-		element->num_inserted = false;
+		element->num_inserted = 0;
 		record.push(element);
 		return 1;
 	}
@@ -211,7 +209,7 @@ RE_tree_node *RE_tree::backtrack(RE_tree_node *p, string::iterator &s, char &typ
 	{
 		while((!record.empty()) && record.top()->type == 2)
 		{
-			if(record.top()->num_inserted == true)
+			while(record.top()->num_inserted > 0)
 			{
 				s--;
 				if(terminator.find(*s) != terminator.end())
@@ -219,6 +217,7 @@ RE_tree_node *RE_tree::backtrack(RE_tree_node *p, string::iterator &s, char &typ
 
 				else
 					type_current = e_type;
+				record.top()->num_inserted--;
 			}
 			record.pop();
 		}
@@ -325,11 +324,13 @@ Node *RE_tree::get_re_tree()
 	input_regex();
 	generate_tree();
 	simplification(root, regex_tree);
+//	print_tree(regex_tree);
 	return regex_tree;
 }
+/*
 int main()
 {
 	RE_tree re;
-	cout<<(int)re.get_re_tree()->value<<endl;
+	re.get_re_tree();
 }
-
+*/

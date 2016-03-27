@@ -22,10 +22,8 @@
   该正则表达式的字符包括a-z A-Z 0-9 和 _
 */
 
-
 #ifndef RE_TREE_H
 #define RE_TREE_H
-
 
 #include <iostream>
 #include <set>
@@ -64,7 +62,7 @@ struct stack_element
 {
 	RE_tree_node *node_inserted;
 	int type;
-	bool num_inserted;
+	int num_inserted;
 };
 
 
@@ -79,6 +77,7 @@ class RE_tree
 public:
 	RE_tree();
 	Node *get_re_tree();
+//	void print_tree(Node *node);
 private:
 	typedef void (*insert_func)(int type, RE_tree_node *p, char num);
 	void input_regex();
@@ -95,7 +94,5 @@ private:
 	Node *regex_tree;
 	set<char> terminator;
 };
-
-
 
 #endif
