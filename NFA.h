@@ -1,5 +1,5 @@
-#ifndef DFA_H
-#define DFA_H
+#ifndef NFA_H
+#define NFA_H
 
 #include "RE_tree.h"
 #define EMPTY 0
@@ -38,6 +38,7 @@ class NFA
 public:
 	NFA_state *Thompson(Node *root);
 	NFA();
+	set<char> element;
 
 private:
 	NFA_state *one_char_nfa(char a);

@@ -123,6 +123,17 @@ NFA_state *NFA::Thompson(Node *root)
 	else
 	{
 		NFA_state *a = one_char_nfa(root->value);
+		element.insert(root->value);
 		return a;
 	}
 }
+/*
+int main()
+{
+	RE_tree re;
+	Node *result = re.get_re_tree();
+	NFA nfa;
+	NFA_state *regex_nfa = nfa.Thompson(result);
+
+}
+*/
