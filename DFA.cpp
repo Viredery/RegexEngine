@@ -1,8 +1,7 @@
 #include "DFA.h"
 
-Transfer::Transfer(int s, int e, char ele)
+Transfer::Transfer(int e, char ele)
 {
-	start = s;
 	end = e;
 	element = ele;
 }
@@ -51,8 +50,10 @@ void DFA::subset_construction(NFA_state *nfa)
 		worklist.pop();
 
 		int start = postion(q);
+		map<char,int> transfer;
+		dfa.push_back(transfer);
 		if(q.find(nfa->end) != q.end())
-			accepted_state.push_back(start);
+			accepted_state.insert(start);
 		set<char>::iterator character = element.begin();
 		while(character != element.end())
 		{
@@ -75,8 +76,7 @@ void DFA::subset_construction(NFA_state *nfa)
 			}
 			if(!equal_state.empty())
 			{
-				Transfer *t = new Transfer(start, pos, *character);
-				record.push_back(t);
+				dfa[start][*character] = pos;
 			}
 
 			equal_state.clear();
@@ -85,6 +85,7 @@ void DFA::subset_construction(NFA_state *nfa)
 		}
 	}
 }
+
 int DFA::postion(set<State *> &p)
 {
 	vector< set<State *> >::iterator set_p = e_state_set.begin();
@@ -106,6 +107,69 @@ int DFA::postion(set<State *> &p)
 	return -1;
 }
 /*
+void DFA::Hopcroft()
+{
+	int size = e_state_set.size();
+	vector< set<int> > group;
+	group.push_back(accepted_state);
+	int i;
+	set<int> unaccepted;
+	for(i = 0; i != size; i++)
+	{
+		if(accepted_state.find(i) == accepted_state.end())
+			unaccepted.insert(i);
+	}
+	group.push_back(unaccepted);
+	bool changed = false;
+	do
+	{
+		changed = false;
+		vector< set<int> > tmp;
+		vector< set<int> >::iterator set_p = group.begin();
+		for(;set_p != group.end(); set_p++)
+		{
+			vector< set<int> > result = split(set_p);
+			vector< set<int> >::iterator p = result.begin();
+			for(; p != result.end(); p++)
+			{
+				changed = true;
+				tmp.push_back(*p);
+			}
+		}
+		group = tmp;
+	}while(changed == true);
+}
+vector< set<int> > DFA::split(vector< set<int> >::iterator p)
+{
+	vector< set<int> > result;
+
+	set<char>::iterator character = element.begin();
+	for(; character != element.end(); character++)
+	{
+		set<int>::iterator tmp = p->begin();
+		for(; tmp != p->end(); tmp++)
+		{
+			multimap<int, Transfer *>::iterator iter = dfa.lower_bound(*tmp);
+			multimap<int, Transfer *>::iterator iter_end = dfa.upper_bound(*tmp);
+			while(iter != iter_end)
+			{
+				if(iter->second->element == *character)
+				{
+					if(p->find(iter->second->end) == p->end())
+					{
+						分成两个set
+					}
+					break:
+				}
+				iter++;
+			}
+			
+		}
+	}
+
+}
+*/
+/*
 int main()
 {
 	RE_tree re;
@@ -114,6 +178,5 @@ int main()
 	NFA_state *regex_nfa = nfa.Thompson(result);
 	DFA dfa(nfa.element);
 	dfa.subset_construction(regex_nfa);
-
 }
 */
