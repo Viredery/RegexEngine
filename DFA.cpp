@@ -1,30 +1,16 @@
-//#ifndef DFA_H
-//#define DFA_H
-//#endif
+#include "DFA.h"
 
-#include "NFA.h"
-#include <set>
-#include <queue>
-using namespace std;
-
-class DFA
+Transfer::Transfer(int s, int e, char ele)
 {
-public:
-	void empty_closure(State *s);
-	vector< set<State *> > e_state_set;
-	queue< set<State *> > worklist;
-	set<char> element;
-	DFA(set<char> e) {
-		element = e;
-	}
-	set<State *> equal_state;
-	void delta(set<State *> es, char c);
-	void subset_construction(State *s);
-	bool contain();
-};
+	start = s;
+	end = e;
+	element = ele;
+}
 
-
-
+DFA::DFA(set<char> e)
+{
+	element = e;
+}
 void DFA::empty_closure(State *s)
 {
 	equal_state.insert(s);
@@ -52,25 +38,21 @@ void DFA::delta(set<State *> es, char c)
 		state++;
 	}
 }
-void DFA::subset_construction(State *s)
+void DFA::subset_construction(NFA_state *nfa)
 {
-	empty_closure(s);
+	empty_closure(nfa->start);
 	e_state_set.push_back(equal_state);
 	worklist.push(equal_state);
 	equal_state.clear();
+	
 	while(!worklist.empty())
 	{
 		set<State *> q = worklist.front();
-/*
-set<State *>::iterator tmp_iter = q.begin();
-while(tmp_iter != q.end())
-{
-cout<<(*tmp_iter)->state<<" ";
-tmp_iter++;
-}
-cout<<endl;
-*/
 		worklist.pop();
+
+		int start = postion(q);
+		if(q.find(nfa->end) != q.end())
+			accepted_state.push_back(start);
 		set<char>::iterator character = element.begin();
 		while(character != element.end())
 		{
@@ -84,38 +66,46 @@ cout<<endl;
 				tmp_p++;
 			}
 
-			//T[q, character] <- equal_state;
-			if(contain() == false && !equal_state.empty())
+			int pos;
+			if((pos = postion(equal_state)) == -1 && !equal_state.empty())
 			{
 				e_state_set.push_back(equal_state);
 				worklist.push(equal_state);
+				pos = e_state_set.size() - 1;
 			}
+			if(!equal_state.empty())
+			{
+				Transfer *t = new Transfer(start, pos, *character);
+				record.push_back(t);
+			}
+
 			equal_state.clear();
 
 			character++;
 		}
 	}
 }
-bool DFA::contain()
+int DFA::postion(set<State *> &p)
 {
 	vector< set<State *> >::iterator set_p = e_state_set.begin();
 	while(set_p != e_state_set.end())
 	{
 		set<State *>::iterator p1 = set_p->begin();
-		set<State *>::iterator p2 = equal_state.begin();
-		while(p1 != set_p->end() && p2 != equal_state.end())
+		set<State *>::iterator p2 = p.begin();
+		while(p1 != set_p->end() && p2 != p.end())
 		{
 			if(*p1 != *p2)
 				break;
 			p1++;
 			p2++;
 		}
-		if(p1 == set_p->end() && p2 == equal_state.end())
-			return true;
+		if(p1 == set_p->end() && p2 == p.end())
+			return (int)(set_p - e_state_set.begin());
 		set_p++;
 	}
-	return false;
+	return -1;
 }
+/*
 int main()
 {
 	RE_tree re;
@@ -123,7 +113,7 @@ int main()
 	NFA nfa;
 	NFA_state *regex_nfa = nfa.Thompson(result);
 	DFA dfa(nfa.element);
-	dfa.subset_construction(regex_nfa->start);
+	dfa.subset_construction(regex_nfa);
 
 }
-
+*/
