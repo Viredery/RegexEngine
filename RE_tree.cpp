@@ -133,9 +133,33 @@ RE_tree::RE_tree()
 	insert.push_back(insert_production_E);
 	insert.push_back(insert_production_F);
 
-	root = new Grammar_node(Regex_symbol, NULL);
+	grammar_tree = new Grammar_node(Regex_symbol, NULL);
 
 	regex_tree = new Regex_node;
+}
+/*
+    析构函数,释放new表达式所分配的内存
+*/
+RE_tree::~RE_tree()
+{
+	delete_grammar_tree(grammar_tree);
+	delete_regex_tree(regex_tree);
+}
+void RE_tree::delete_grammar_tree(Grammar_node *node)
+{
+	if(node == NULL)
+		return;
+	delete_grammar_tree(node->lch_node);
+	delete_grammar_tree(node->bro_node);
+	delete node;
+}
+void RE_tree::delete_regex_tree(Regex_node *node)
+{
+	if(node == NULL)
+		return;
+	delete_regex_tree(node->left);
+	delete_regex_tree(node->right);
+	delete node;
 }
 /*
     读入用户输入的正则表达式
@@ -152,7 +176,7 @@ void RE_tree::generate_tree()
 {
 	string::iterator pos_current = regex_string.begin();
 	string::iterator pos_end = regex_string.end();
-	Grammar_node * node = root;
+	Grammar_node * node = grammar_tree;
 	char symbol_current = get_current_symbol(pos_current);
 	while(true)
 	{
@@ -278,14 +302,15 @@ Regex_node *RE_tree::get_re_tree()
 {
 	input_regex();
 	generate_tree();
-	simplification(root, regex_tree);
+	simplification(grammar_tree, regex_tree);
 //	print_tree(regex_tree);
 	return regex_tree;
 }
 
-
+/*
 int main()
 {
 	RE_tree re;
 	re.get_re_tree();
 }
+*/

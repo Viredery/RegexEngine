@@ -49,6 +49,7 @@ class RE_tree
 {
 public:
 	RE_tree();
+	~RE_tree();
 	Regex_node *get_re_tree();
 private:
 	typedef void (*insert_func)(char type, Grammar_node *p, char num);
@@ -58,12 +59,13 @@ private:
 	Grammar_node *get_next_node(Grammar_node *p);
 	char get_current_symbol(string::iterator pos_current);
 	void print_tree(Regex_node *node);
+	void delete_grammar_tree(Grammar_node *node);
+	void delete_regex_tree(Regex_node *node);
 
 	vector<insert_func> insert;
 	set<char> terminator;
-
 	string regex_string;
-	Grammar_node *root;
+	Grammar_node *grammar_tree;
 	Regex_node *regex_tree;
 	
 };
