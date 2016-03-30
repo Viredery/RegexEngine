@@ -20,21 +20,27 @@ void State::assign(int s,  Edge *e)
 
 int NFA::next_state_num = 0;
 NFA::NFA() {}
-
+NFA::~NFA()
+{
+	delete_state_edge(save_data_for_delete);
+}
 /*
-    释放动态分配的内存,需要调用
+    释放动态分配的内存
 */
 void NFA::delete_state_edge(State *state)
 {
-	if(state == NULL)
+	if(*(int *)state == 0)
 		return;
 	Edge *p = state->edge;
 	delete state;
+	*(int *)state = 0;
 	while(p != NULL)
 	{
+
 		delete_state_edge(p->next_state);
 		Edge *p_next = p->next_edge;
-		delete p;
+
+		delete p;	
 		p = p_next;
 	}
 }
@@ -130,13 +136,15 @@ NFA_state *NFA::closure(NFA_state *a)
 /*
     根据RE构造NFA
 */
-NFA_state *NFA::Thompson(Regex_node *node)
+NFA_state *NFA::Thompson_achieve(Regex_node *node)
 {
 	if(node->value == ALT)
 	{
 		NFA_state *a = Thompson(node->left);
 		NFA_state *b = Thompson(node->right);
 		NFA_state *c = alt(a,b);
+		delete a;
+		delete b;
 		return c;
 	}
 	else if(node->value == CONCAT)
@@ -144,12 +152,15 @@ NFA_state *NFA::Thompson(Regex_node *node)
 		NFA_state *a = Thompson(node->left);
 		NFA_state *b = Thompson(node->right);
 		NFA_state *c = concat(a,b);
+		delete a;
+		delete b;
 		return c;
 	}
 	else if(node->value == CLOSURE)
 	{
 		NFA_state *a = Thompson(node->left);
 		NFA_state *c = closure(a);
+		delete a;
 		return c;
 	}
 	else
@@ -158,6 +169,19 @@ NFA_state *NFA::Thompson(Regex_node *node)
 		element.insert(node->value);
 		return a;
 	}
+}
+NFA_state *NFA::Thompson(Regex_node *node)
+{
+	NFA_state *result = Thompson_achieve(node);
+	save_data_for_delete = result->start;
+	return result;
+}
+/*
+    返回所有字符的集合
+*/
+set<char> NFA::get_element_set()
+{
+	return element;
 }
 /*
 int main()
