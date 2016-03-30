@@ -283,6 +283,7 @@ Regex_node *RE_tree::get_re_tree()
 	return regex_tree;
 }
 
+
 int main()
 {
 	RE_tree re;

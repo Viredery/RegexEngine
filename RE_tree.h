@@ -45,7 +45,6 @@ struct Regex_node
 };
 
 
-
 class RE_tree
 {
 public:
