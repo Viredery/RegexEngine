@@ -1,236 +1,196 @@
 #include "RE_tree.h"
 
+enum {
+	Regex_symbol = 0, A_symbol, B_symbol, C_symbol, D_symbol, E_symbol, F_symbol, e_symbol, sign_symbol, eof_symbol
+};
 
-void insert_production_one(int type, RE_tree_node *p, char num)
+class Grammar_node
 {
-	if(type == 1)
-	{
-		RE_tree_node *p_left = new RE_tree_node('|', p);
-		RE_tree_node *p_middle = new RE_tree_node(A_start, p);
-		RE_tree_node *p_right = new RE_tree_node(Regex_type, p);
-		p->lch_node = p_left;
-		p_left->bro_node = p_middle;
-		p_middle->bro_node = p_right;
-	}
-	else if(type == 2)
-	{
-		RE_tree_node *p_child = new RE_tree_node(eof_type, p);
-		p->lch_node = p_child;
-	}
-	else
-		throw -1;
-}
-void insert_production_two(int type, RE_tree_node *p, char num)
-{
-	if(type == 1)
-	{
-		RE_tree_node *p_left = new RE_tree_node(B_type, p);
-		RE_tree_node *p_right = new RE_tree_node(A_type, p);
-		p->lch_node = p_left;
-		p_left->bro_node = p_right;
-	}
-	else if(type == 2)
-	{
-		RE_tree_node *p_child = new RE_tree_node(eof_type, p);
-		p->lch_node = p_child;
-	}
-	else
-		throw -1;
-}
-void insert_production_three(int type, RE_tree_node *p, char num)
-{
-	if(type == 1)
-	{
+public:
+	int symbol;
+	char value;
+	Grammar_node *prt_node;
+	Grammar_node *lch_node;
+	Grammar_node *bro_node;
+	Grammar_node(int s, Grammar_node *p, char v = '\0', Grammar_node *l = NULL, Grammar_node *b = NULL);
+};
 
-		RE_tree_node *p_left = new RE_tree_node(C_type, p);
-		RE_tree_node *p_right = new RE_tree_node('*', p);
-		p->lch_node = p_left;
-		p_left->bro_node = p_right;	
-	}
-	else if(type == 2)
-	{
-		RE_tree_node *p_new = new RE_tree_node(C_type, p);
-		p->lch_node = p_new;
-	}
-	else
-		throw -1;
-}
-void insert_production_four(int type, RE_tree_node *p, char num)
+Grammar_node::Grammar_node(int s, Grammar_node *p, char v, Grammar_node *l, Grammar_node *b)
 {
-	if(type == 1)
-	{
-		RE_tree_node *p_left = new RE_tree_node('(', p);
-		RE_tree_node *p_middle = new RE_tree_node(Regex_start, p);
-		RE_tree_node *p_right = new RE_tree_node(')', p);
-		p->lch_node = p_left;
-		p_left->bro_node = p_middle;
-		p_middle->bro_node = p_right;
-	}
-	else if(type == 2)
-	{
-		RE_tree_node *p_new = new RE_tree_node(e_type, p);
-		p_new->value = num;
-		p->lch_node = p_new;
-	}
-	else
-		throw -1;
-}
-void insert_production_five(int type, RE_tree_node *p, char num)
-{
-	RE_tree_node *p_left = new RE_tree_node(A_start, p);
-	RE_tree_node *p_right = new RE_tree_node(Regex_type, p);
-	p->lch_node = p_left;
-	p_left->bro_node = p_right;
-}
-void insert_production_six(int type, RE_tree_node *p, char num)
-{
-	RE_tree_node *p_left = new RE_tree_node(B_type, p);
-	RE_tree_node *p_right = new RE_tree_node(A_type, p);
-	p->lch_node = p_left;
-	p_left->bro_node = p_right;
-}
-
-RE_tree_node::RE_tree_node(int t, RE_tree_node *p, char v, RE_tree_node *l, RE_tree_node *b)
-{
-	type = t;
+	symbol = s;
 	prt_node = p;
 	lch_node = l;
 	bro_node = b;
 	value = v;
 }
+void insert_production_one_child(Grammar_node *p, char child_symbol, char num = '\0')
+{
+	Grammar_node *p_child = new Grammar_node(child_symbol, p, num);
+	p->lch_node = p_child;
+}
+void insert_production_two_child(Grammar_node *p, char lchild_symbol, char rchild_symbol)
+{
+	Grammar_node *p_left = new Grammar_node(lchild_symbol, p);
+	Grammar_node *p_right = new Grammar_node(rchild_symbol, p);
+	p->lch_node = p_left;
+	p_left->bro_node = p_right;
+}
+void insert_production_three_child(Grammar_node *p, char lchild_symbol, char mchild_symbol, char rchild_symbol)
+{
+	Grammar_node *p_left = new Grammar_node(lchild_symbol, p);
+	Grammar_node *p_middle = new Grammar_node(mchild_symbol, p);
+	Grammar_node *p_right = new Grammar_node(rchild_symbol, p);
+	p->lch_node = p_left;
+	p_left->bro_node = p_middle;
+	p_middle->bro_node = p_right;
+}
+/*
+      RegEx -> B A
+*/
+void insert_production_Regex(char symbol, Grammar_node *p, char num)
+{
+	insert_production_two_child(p, B_symbol, A_symbol);
+}
+/*
+      A -> | B A
+        -> eof
+*/
+void insert_production_A(char symbol, Grammar_node *p, char num)
+{
+	if(symbol =='|')
+		insert_production_three_child(p, '|', B_symbol, A_symbol);
+	else
+		insert_production_one_child(p, eof_symbol);
+}
+/*
+      B -> D C
+*/
+void insert_production_B(char symbol, Grammar_node *p, char num)
+{
+	insert_production_two_child(p, D_symbol, C_symbol);
+}
+/*
+      C -> D C
+        -> eof
+*/
+void insert_production_C(char symbol, Grammar_node *p, char num)
+{
+	if(symbol == '(' || symbol == e_symbol)
+		insert_production_two_child(p, B_symbol, A_symbol);
+	else
+		insert_production_one_child(p, eof_symbol);
+}
+/*
+      D -> E F
+*/
+void insert_production_D(char symbol, Grammar_node *p, char num)
+{
+	insert_production_two_child(p, E_symbol, F_symbol);
+}
+/*
+      E -> ( RegEx )
+        -> element
+*/
+void insert_production_E(char symbol, Grammar_node *p, char num)
+{
+	if(symbol == '(')
+		insert_production_three_child(p, '(', Regex_symbol, ')');
+	else
+		insert_production_one_child(p, e_symbol, num);
+}
+/*
+     F -> *
+       -> eof
+*/
+void insert_production_F(char symbol, Grammar_node *p, char num)
+{
+	if(symbol == '*')
+		insert_production_one_child(p, '*');
+	else
+		insert_production_one_child(p, eof_symbol);
+}
 
 
 
+/*
+    初始化终结符集合terminator,以及产生式数组insert
+*/
 RE_tree::RE_tree()
 {
 	terminator.insert('*');
 	terminator.insert('|');
 	terminator.insert('(');
 	terminator.insert(')');
-	terminator.insert(e_type);
-	terminator.insert(eof_type);
+	terminator.insert(e_symbol);
+	terminator.insert(eof_symbol);
 
-	insert.push_back(insert_production_one);
-	insert.push_back(insert_production_two);
-	insert.push_back(insert_production_three);
-	insert.push_back(insert_production_four);
-	insert.push_back(insert_production_five);
-	insert.push_back(insert_production_six);
 
-	root = new RE_tree_node(Regex_start, NULL);
+	insert.push_back(insert_production_Regex);
+	insert.push_back(insert_production_A);
+	insert.push_back(insert_production_B);
+	insert.push_back(insert_production_C);
+	insert.push_back(insert_production_D);
+	insert.push_back(insert_production_E);
+	insert.push_back(insert_production_F);
 
-	regex_tree = new Node;
+	root = new Grammar_node(Regex_symbol, NULL);
+
+	regex_tree = new Regex_node;
 }
-
+/*
+    读入用户输入的正则表达式
+*/
 void RE_tree::input_regex()
 {
-	cout <<"请输入正则表达式："<<endl;
-	cin>> regex;
+	cout << "请输入正则表达式：" << endl;
+	cin >> regex_string;
 }
+/*
+    构建文法分析树
+*/
 void RE_tree::generate_tree()
 {
-	string::iterator pos_current = regex.begin();
-	string::iterator pos_end = regex.end();
-	RE_tree_node * node = root;
-	char type_current;
-	if(terminator.find(*pos_current) != terminator.end())
-		type_current = *pos_current;
-	else
-		type_current = e_type;
+	string::iterator pos_current = regex_string.begin();
+	string::iterator pos_end = regex_string.end();
+	Grammar_node * node = root;
+	char symbol_current = get_current_symbol(pos_current);
 	while(true)
 	{
-		if(terminator.find(node->type) != terminator.end() && node->type == eof_type)
+		if(terminator.find(node->symbol) != terminator.end() && node->symbol == eof_symbol)
 			node = get_next_node(node);
-		else if(terminator.find(node->type) != terminator.end() && type_current == node->type)
+		else if(terminator.find(node->symbol) != terminator.end() && symbol_current == node->symbol)
 		{
-			record.top()->num_inserted++;
 			node = get_next_node(node);
+			pos_current++;	//这里不需要先判断是否pos_current != pos_end
 			if(pos_current != pos_end)
-			{
-				pos_current++;
-				if(pos_current != pos_end)
-				{
-					if(terminator.find(*pos_current) != terminator.end())
-						type_current = *pos_current;
-					else
-						type_current = e_type;
-				}
-				else
-					type_current = eof_type;
-			}
+				symbol_current = get_current_symbol(pos_current);
 			else
-				type_current = eof_type;
+				symbol_current = eof_symbol;
+
 		}
-		else if(terminator.find(node->type) != terminator.end() && type_current != node->type)
-			node = backtrack(node, pos_current, type_current);
-		else if(terminator.find(node->type) == terminator.end())
+		else if(terminator.find(node->symbol) == terminator.end())
 		{
-			int type = push_element(node, pos_current, type_current);
-			insert[node->type](type, node, *pos_current);
+			insert[node->symbol](symbol_current, node, *pos_current);
 			node = node->lch_node;
 		}
 		if(node == NULL && pos_current == pos_end)
 			return;
-		else if(node == NULL && pos_current != pos_end)
-			node = backtrack(node, pos_current, type_current);
 	}
 }
-
-int RE_tree::push_element(RE_tree_node *p, string::iterator &s, char &type_current)
+/*
+    构建文法分析树辅助函数,获取下一个符号信息
+*/
+char RE_tree::get_current_symbol(string::iterator pos_current)
 {
-	stack_element *element = new stack_element;
-	if((!record.empty()) && record.top()->node_inserted == p && record.top()->type == 1)
-	{
-		while(record.top()->num_inserted > 0)
-		{
-			s--;
-			if(terminator.find(*s) != terminator.end())
-				type_current = *s;
-			else
-				type_current = e_type;
-			record.top()->num_inserted--;
-		}
-		record.top()->type = 2;
-		return 2;
-	}
+	if(terminator.find(*pos_current) != terminator.end())
+		return *pos_current;
 	else
-	{
-		element->node_inserted = p;
-		element->type = 1;
-		element->num_inserted = 0;
-		record.push(element);
-		return 1;
-	}
+		return e_symbol;
 }
-//目前没有delete
-RE_tree_node *RE_tree::backtrack(RE_tree_node *p, string::iterator &s, char &type_current)
-{
-	while((!record.empty()) && record.top()->type == 2)
-	{
-		while((!record.empty()) && record.top()->type == 2)
-		{
-			while(record.top()->num_inserted > 0)
-			{
-				s--;
-				if(terminator.find(*s) != terminator.end())
-					type_current = *s;
-
-				else
-					type_current = e_type;
-				record.top()->num_inserted--;
-			}
-			record.pop();
-		}
-		while((!record.empty()) && (record.top()->node_inserted->type == A_start || record.top()->node_inserted->type == Regex_start))
-			record.pop();
-	}
-
-	if(record.empty())
-		return NULL;
-	else
-		return record.top()->node_inserted;
-}
-RE_tree_node *RE_tree::get_next_node(RE_tree_node *p)
+/*
+    构建文法分析树辅助函数,获取下一个符号信息
+*/
+Grammar_node *RE_tree::get_next_node(Grammar_node *p)
 {
 	if(p == NULL)
 		return NULL;
@@ -238,67 +198,58 @@ RE_tree_node *RE_tree::get_next_node(RE_tree_node *p)
 		return p->bro_node;
 	return get_next_node(p->prt_node);
 }
+
 /*
-void RE_tree::print_tree(RE_tree_node *p)
-{
-	if(p == NULL)
-		cout<<endl;
-	else
-	{
-		cout<<p->type<<" ";
-		print_tree(p->lch_node);
-		print_tree(p->bro_node);
-	}
-}
+    简化分析树作为输出,之后用该树来构造NFA
 */
-void RE_tree::simplification(RE_tree_node *root, Node *node)
+void RE_tree::simplification(Grammar_node *root, Regex_node *node)
 {
-	if(root->type == A_start)
+	if(root->symbol == B_symbol)
 	{
-		if(root->bro_node->lch_node->type == eof_type)
+		if(root->bro_node->lch_node->symbol == eof_symbol)
 			simplification(root->lch_node, node);
 		else
 		{
 			node->value = ALT;
-			Node *left = new Node;
-			Node *right = new Node;
+			Regex_node *left = new Regex_node;
+			Regex_node *right = new Regex_node;
 			node->left = left;
 			node->right = right;
 			simplification(root->lch_node, left);
 			simplification(root->bro_node->lch_node->bro_node, right);
 		}
 	}
-	else if(root->type == B_type)
+	else if(root->symbol == D_symbol)
 	{
-		if(root->bro_node->lch_node->type == eof_type)
+		if(root->bro_node->lch_node->symbol == eof_symbol)
 			simplification(root->lch_node, node);
 		else
 		{
 			node->value = CONCAT;
-			Node *left = new Node;
-			Node *right = new Node;
+			Regex_node *left = new Regex_node;
+			Regex_node *right = new Regex_node;
 			node->left = left;
 			node->right = right;
 			simplification(root->lch_node, left);
 			simplification(root->bro_node->lch_node, right);
 		}
 	}
-	else if(root->type == C_type)
+	else if(root->symbol == E_symbol)
 	{
-		if(root->bro_node == NULL)
+		if(root->bro_node->lch_node->symbol == eof_symbol)
 			simplification(root->lch_node, node);
 		else
 		{
 			node->value = CLOSURE;
-			Node *left = new Node;
+			Regex_node *left = new Regex_node;
 			node->left = left;
 			node->right = NULL;
 			simplification(root->lch_node, left);
 		}
 	}
-	else if(root->type == '(')
+	else if(root->symbol == '(')
 		simplification(root->bro_node, node);
-	else if(root->type == e_type)
+	else if(root->symbol == e_symbol)
 	{
 		node->value = root->value;
 		node->left = node->right = NULL;
@@ -307,7 +258,9 @@ void RE_tree::simplification(RE_tree_node *root, Node *node)
 		simplification(root->lch_node, node);
 }
 /*
-void RE_tree::print_tree(Node *node)
+    打印RE树,检查是否得到正确结果
+*/
+void RE_tree::print_tree(Regex_node *node)
 {
 	if(node == NULL)
 		cout<<"NULL ";
@@ -318,8 +271,10 @@ void RE_tree::print_tree(Node *node)
 		print_tree(node->right);
 	}
 }
+/*
+    执行输入的正则表达式到RE树的转换
 */
-Node *RE_tree::get_re_tree()
+Regex_node *RE_tree::get_re_tree()
 {
 	input_regex();
 	generate_tree();
@@ -327,10 +282,9 @@ Node *RE_tree::get_re_tree()
 //	print_tree(regex_tree);
 	return regex_tree;
 }
-/*
+
 int main()
 {
 	RE_tree re;
 	re.get_re_tree();
 }
-*/

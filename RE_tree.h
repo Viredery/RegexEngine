@@ -4,22 +4,23 @@
 
 
 
+1    RegEx -> B A
+2    A -> | B A
+3      -> eof
 
-     Regex' -> A' Regex
-1    Regex -> | A' Regex
-2           -> eof
+4    B -> D C
+5    C -> D C
+6      -> eof
 
-     A' -> B A
-3    A -> B A
-4      -> eof
+7    D -> E F
 
-5    B -> C*
-6      -> C
+8    E -> ( RegEx )
+9      -> element
 
-7    C -> ( RegEx' )
-8      -> e
+10   F -> *
+11     -> eof
 
-  该正则表达式的字符包括a-z A-Z 0-9 和 _
+  该正则表达式的字符包括a-z A-Z 0-9
 */
 
 #ifndef RE_TREE_H
@@ -29,70 +30,43 @@
 #include <set>
 #include <vector>
 #include <string>
-#include <stack>
 using namespace std;
+class Grammar_node;
 
-enum {
-	Regex_type = 0, A_type, B_type, C_type, Regex_start, A_start, e_type, sign_type, eof_type
-};
-enum NodeKind {
+enum Operation {
 	ALT = 0, CONCAT, CLOSURE
 };
 
-struct Node
+struct Regex_node
 {
 	char value;
-	Node *left;
-	Node *right;
+	Regex_node *left;
+	Regex_node *right;
 };
 
 
-class RE_tree_node
-{
-public:
-	int type;
-	char value;
-	RE_tree_node *prt_node;
-	RE_tree_node *lch_node;
-	RE_tree_node *bro_node;
-	RE_tree_node(int t, RE_tree_node *p, char v = '\0', RE_tree_node *l = NULL, RE_tree_node *b = NULL);
-};
 
-struct stack_element
-{
-	RE_tree_node *node_inserted;
-	int type;
-	int num_inserted;
-};
-
-
-static void insert_production_one(int type, RE_tree_node *p, char num = '\0');
-static void insert_production_two(int type, RE_tree_node *p, char num = '\0');
-static void insert_production_three(int type, RE_tree_node *p, char num = '\0');
-static void insert_production_four(int type, RE_tree_node *p, char num = '\0');
-static void insert_production_five(int type, RE_tree_node *p, char num = '\0');
-static void insert_production_six(int type, RE_tree_node *p, char num = '\0');
 class RE_tree
 {
 public:
 	RE_tree();
-	Node *get_re_tree();
-//	void print_tree(Node *node);
+	Regex_node *get_re_tree();
 private:
-	typedef void (*insert_func)(int type, RE_tree_node *p, char num);
+	typedef void (*insert_func)(char type, Grammar_node *p, char num);
 	void input_regex();
 	void generate_tree();
-	void simplification(RE_tree_node *root, Node *start);	
-	RE_tree_node *get_next_node(RE_tree_node *p);
-	RE_tree_node *backtrack(RE_tree_node *p, string::iterator &s, char &type_current);
-	int push_element(RE_tree_node *p, string::iterator &s, char &type_current);
+	void simplification(Grammar_node *root, Regex_node *start);	
+	Grammar_node *get_next_node(Grammar_node *p);
+	char get_current_symbol(string::iterator pos_current);
+	void print_tree(Regex_node *node);
 
 	vector<insert_func> insert;
-	string regex;
-	RE_tree_node *root;
-	stack<stack_element *> record;
-	Node *regex_tree;
 	set<char> terminator;
+
+	string regex_string;
+	Grammar_node *root;
+	Regex_node *regex_tree;
+	
 };
 
 #endif
