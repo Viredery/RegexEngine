@@ -124,14 +124,14 @@ RE_tree::RE_tree()
 	terminator.insert(e_symbol);
 	terminator.insert(eof_symbol);
 
-	insert.resize(7, NULL);
-	insert[0] = insert_production_Regex;
-	insert[1] = insert_production_A;
-	insert[2] = insert_production_B;
-	insert[3] = insert_production_C;
-	insert[4] = insert_production_D;
-	insert[5] = insert_production_E;
-	insert[6] = insert_production_F;
+	insert.reserve(7);
+	insert.push_back(insert_production_Regex);
+	insert.push_back(insert_production_A);
+	insert.push_back(insert_production_B);
+	insert.push_back(insert_production_C);
+	insert.push_back(insert_production_D);
+	insert.push_back(insert_production_E);
+	insert.push_back(insert_production_F);
 
 	grammar_tree = new Grammar_node(Regex_symbol, NULL);
 
