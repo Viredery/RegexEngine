@@ -7,7 +7,7 @@
 #include <memory>
 #include "Node.hpp"
 #include "PostfixExpressionVisitor.hpp"
-
+#include "TreeConstructionVisitor.hpp"
 class SyntacticTree
 {
 public:
@@ -33,13 +33,22 @@ public:
 	SyntacticTree(SyntacticTree&) = delete;
 	SyntacticTree &operator=(const SyntacticTree&) = delete;
 
+    void printTree(std::shared_ptr<Node> root);
 private:
     void handleCombiner(bool flag);
     int handleElementSet(int index);
     int handleQuantifier(int index);
 };
 
-
+void SyntacticTree::printTree(std::shared_ptr<Node> root) {
+    if (root == nullptr)
+        std::cout << "nullptr ";
+    else {
+        std::cout << root->toString() << " ";
+        printTree(root->left);
+        printTree(root->right);
+    }
+}
 /* first, we handle these input:
  *   [^abcd],|,*,+,?,(),^,$,.,{n,m}
  * next:
@@ -149,7 +158,13 @@ void SyntacticTree::constructTree()
     auto peList = pev.getPostExpr();
     nodeList = std::move(peList);
 
-    //TreeConstructionVisitor tcv;
+    TreeConstructionVisitor tcv;
+    for (auto iter = nodeList.begin(); iter != nodeList.end(); iter++) {
+    	(*iter)->accept(&tcv);
+    }
+    root = tcv.getTree();
+    nodeList.clear();
+    printTree(root);
 }
 
 
