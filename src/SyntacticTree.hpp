@@ -17,27 +17,30 @@ public:
     void toString() {
     	for (auto node : nodeList)
     		std::cout << node->toString() << " ";
-    	std::cout <<std::endl;
+    	std::cout << std::endl;
     }
     void scan();
     void constructTree();
 
-	std::string pattern;
-
-	std::vector<std::shared_ptr<Node>> nodeList;
-	std::shared_ptr<Node> root = nullptr;
-
-	bool startRestriction = false;
-	bool endRestriction = true;
+    std::shared_ptr<Node> getTree() {
+        return root;
+    }
 
 	SyntacticTree(SyntacticTree&) = delete;
 	SyntacticTree &operator=(const SyntacticTree&) = delete;
 
     void printTree(std::shared_ptr<Node> root);
 private:
+    bool startRestriction = false;
+    bool endRestriction = true;
     void handleCombiner(bool flag);
     int handleElementSet(int index);
     int handleQuantifier(int index);
+
+    std::string pattern;
+
+    std::vector<std::shared_ptr<Node>> nodeList;
+    std::shared_ptr<Node> root = nullptr;
 };
 
 void SyntacticTree::printTree(std::shared_ptr<Node> root) {
@@ -45,10 +48,12 @@ void SyntacticTree::printTree(std::shared_ptr<Node> root) {
         std::cout << "nullptr ";
     else {
         std::cout << root->toString() << " ";
-        printTree(root->left);
-        printTree(root->right);
+        printTree(root->getLeft());
+        printTree(root->getRight());
     }
 }
+
+
 /* first, we handle these input:
  *   [^abcd],|,*,+,?,(),^,$,.,{n,m}
  * next:
@@ -73,15 +78,15 @@ void SyntacticTree::scan() {
 			    itemTerminated = false;
 			    break;
 			case '+':
-			    nodeList.push_back(std::make_shared<ClosureNode>(1, -1, true));
+			    nodeList.push_back(std::make_shared<ClosureNode>(1, -1));
 			    itemTerminated = true;
 			    break;
 			case '?':
-			    nodeList.push_back(std::make_shared<ClosureNode>(0, 1, false));
+			    nodeList.push_back(std::make_shared<ClosureNode>(0, 1));
 			    itemTerminated = true;
 			    break;
 			case '*':
-			    nodeList.push_back(std::make_shared<ClosureNode>(0, -1, true));
+			    nodeList.push_back(std::make_shared<ClosureNode>(0, -1));
 			    itemTerminated = true;
 			    break;
 			case '{':
@@ -118,7 +123,7 @@ void SyntacticTree::scan() {
                 elementSet->setElement(pattern[index]);
 			    nodeList.push_back(elementSet);
 			    itemTerminated = true;
-			    break;
+                break;
 			}
 		}
 		index++;
@@ -155,16 +160,13 @@ void SyntacticTree::constructTree()
     for (auto iter = nodeList.begin(); iter != nodeList.end(); iter++) {
     	(*iter)->accept(&pev);
     }
-    auto peList = pev.getPostExpr();
-    nodeList = std::move(peList);
-
+    nodeList = std::move(pev.getPostExpr());
     TreeConstructionVisitor tcv;
     for (auto iter = nodeList.begin(); iter != nodeList.end(); iter++) {
     	(*iter)->accept(&tcv);
     }
     root = tcv.getTree();
     nodeList.clear();
-    printTree(root);
 }
 
 
@@ -197,7 +199,6 @@ int SyntacticTree::handleElementSet(int index) {
 }
 int SyntacticTree::handleQuantifier(int index) {
     int minRepetition, maxRepetition;
-    bool infinite = false;
     index = index + 1;
     std::size_t leftEnd = pattern.find_first_of(',', index);
     std::string strMinRepetition = pattern.substr(index, leftEnd - index);
@@ -206,13 +207,11 @@ int SyntacticTree::handleQuantifier(int index) {
     std::size_t rightEnd = pattern.find_first_of('}', index);
     std::string strMaxRepetition = pattern.substr(index, rightEnd - index);
     maxRepetition = strMaxRepetition == "" ? -1 : std::stoi(strMaxRepetition);
-    if (maxRepetition == -1)
-    	infinite = true;
     index = rightEnd;
-    nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition, infinite));
+    nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition));
     return index;
 }
-
+/*
 int main() {
 	//SyntacticTree st("[aeiou]{,4}[0-9]?");
 	SyntacticTree st("[aeiou]{,4}|[0-9]?(com|.?)a*");
@@ -220,5 +219,5 @@ int main() {
     st.constructTree();
     st.toString();
 }
-
+*/
 #endif

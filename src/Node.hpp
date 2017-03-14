@@ -3,8 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <tuple>
-#include <cstdio>
 #include <memory>
 #include <bitset>
 #include "Visitor.hpp"
@@ -13,13 +11,19 @@ class Node {
 public:
 	Node() = default;
 	virtual ~Node() = default;
-    void setChildNode(std::shared_ptr<Node> leftNode, std::shared_ptr<Node> rightNode) {
+    inline void setChildNode(std::shared_ptr<Node> leftNode, std::shared_ptr<Node> rightNode) {
     	left = leftNode;
     	right = rightNode;
     }
+    inline std::shared_ptr<Node> getLeft() {
+        return left;
+    }
+    inline std::shared_ptr<Node> getRight() {
+        return right;
+    }
     virtual void accept(Visitor* visitor) = 0;
     virtual std::string toString() = 0;
-
+private:
     std::shared_ptr<Node> left = nullptr;
     std::shared_ptr<Node> right = nullptr;
 };
@@ -54,8 +58,12 @@ public:
     void inverse() {
         elementSet.flip();
     }
+    std::string getElementString() {
+        return elementSet.to_string<char>();
+    }
 	std::bitset<128> elementSet;
 };
+
 
 class OrNode: public BranchNode, public std::enable_shared_from_this<OrNode> {
 public:
@@ -82,8 +90,8 @@ public:
 // Only greedy matches currently.
 class ClosureNode: public BranchNode, public std::enable_shared_from_this<ClosureNode> {
 public:
-	ClosureNode(int minRep, int maxRep, bool inf):
-        minRepetition(minRep), maxRepetition(maxRep), infinite(inf) {}
+	ClosureNode(int minRep, int maxRep):
+        minRepetition(minRep), maxRepetition(maxRep) {}
     void accept(Visitor* visitor) override {
         visitor->visit(shared_from_this());
     }
@@ -93,9 +101,14 @@ public:
         return res;
     }
 
+    int getMinRepetition() const {
+        return minRepetition;
+    }
+    int getMaxRepetition() const {
+        return maxRepetition;
+    }
     int minRepetition;
     int maxRepetition;
-    bool infinite;
 };
 
 // We will handle this node later.
@@ -132,4 +145,4 @@ public:
     }
 };
 
-#endif
+#endif // NODE_H_

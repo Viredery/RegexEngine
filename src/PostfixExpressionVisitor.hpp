@@ -17,7 +17,7 @@ public:
     void visit(std::shared_ptr<LeftBracket> node) override;
     void visit(std::shared_ptr<RightBracket> node) override;
 
-    std::vector<std::shared_ptr<Node>> getPostExpr();
+    std::vector<std::shared_ptr<Node>>& getPostExpr();
 private:
     std::vector<std::shared_ptr<Node>> elementStack;
     std::vector<std::shared_ptr<Node>> operatorStack;
@@ -80,7 +80,7 @@ void PostfixExpressionVisitor::visit(std::shared_ptr<RightBracket> node) {
     operatorStack.pop_back();
 }
 
-std::vector<std::shared_ptr<Node>> PostfixExpressionVisitor::getPostExpr() {
+std::vector<std::shared_ptr<Node>>& PostfixExpressionVisitor::getPostExpr() {
     while (!operatorStack.empty()) {
         auto top = operatorStack.back();
         elementStack.push_back(top);
@@ -88,4 +88,5 @@ std::vector<std::shared_ptr<Node>> PostfixExpressionVisitor::getPostExpr() {
     }
     return elementStack;
 }
-#endif
+
+#endif // POSTFIX_EXPRESSION_VISITOR_H_
