@@ -14,9 +14,9 @@ class Node {
 public:
 	Node() = default;
 	virtual ~Node() = default;
-    inline void setChildNode(std::shared_ptr<Node> leftNode, std::shared_ptr<Node> rightNode);
-    inline std::shared_ptr<Node> getLeft();
-    inline std::shared_ptr<Node> getRight();
+    void setChildNode(std::shared_ptr<Node> leftNode, std::shared_ptr<Node> rightNode);
+    std::shared_ptr<Node> getLeft();
+    std::shared_ptr<Node> getRight();
     virtual void accept(Visitor* visitor) = 0;
     virtual std::string toString() = 0;
 private:
@@ -43,9 +43,9 @@ public:
 	ElementNode() = default;
     void accept(Visitor* visitor) override;
     std::string toString() override;
-    inline void setElement(char character);
-    inline void inverse();
-    inline std::string getElementString();
+    void setElement(char character);
+    void inverse();
+    std::string getElementString();
 	std::bitset<128> elementSet;
 };
 
@@ -69,8 +69,8 @@ public:
     void accept(Visitor* visitor) override;
     std::string toString() override;
 
-    inline int getMinRepetition() const;
-    inline int getMaxRepetition() const;
+    int getMinRepetition() const;
+    int getMaxRepetition() const;
     int minRepetition;
     int maxRepetition;
 };

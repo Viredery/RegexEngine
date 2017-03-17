@@ -19,11 +19,11 @@ std::shared_ptr<Node> Node::getRight() {
     return right;
 }
 
-void ElementNode::accept(Visitor* visitor) override {
+void ElementNode::accept(Visitor* visitor) {
     visitor->visit(shared_from_this());
 }
 
-std::string ElementNode::toString() override {
+std::string ElementNode::toString() {
     return "ElementNode";
 }
 
@@ -39,30 +39,30 @@ std::string ElementNode::getElementString() {
     return elementSet.to_string<char>();
 }
 
-void OrNode::accept(Visitor* visitor) override {
+void OrNode::accept(Visitor* visitor) {
     visitor->visit(shared_from_this());
 }
 
-std::string OrNode::toString() override {
+std::string OrNode::toString() {
     return "OrNode";
 }
 
-void CombineNode::accept(Visitor* visitor) override {
+void CombineNode::accept(Visitor* visitor) {
     visitor->visit(shared_from_this()); 
 }
 
-std::string CombineNode::toString() override {
+std::string CombineNode::toString() {
     return "CombineNode";
 }
 
 ClosureNode::ClosureNode(int minRep, int maxRep):
         minRepetition(minRep), maxRepetition(maxRep) {}
 
-void ClosureNode::accept(Visitor* visitor) override {
+void ClosureNode::accept(Visitor* visitor) {
     visitor->visit(shared_from_this());
 }
 
-std::string ClosureNode::toString() override {
+std::string ClosureNode::toString() {
     std::string res("");
     res = res + "ClosureNode: " + std::to_string(minRepetition) + " " + std::to_string(maxRepetition);
     return res;
@@ -76,27 +76,27 @@ int ClosureNode::getMaxRepetition() const {
     return maxRepetition;
 }
 
-void FunctionNode::accept(Visitor* visitor) override {
+void FunctionNode::accept(Visitor* visitor) {
     visitor->visit(shared_from_this());
 }
 
-std::string FunctionNode::toString() override {
+std::string FunctionNode::toString() {
     return "FunctionNode";
 }
 
-void LeftBracket::accept(Visitor* visitor) override {
+void LeftBracket::accept(Visitor* visitor) {
     visitor->visit(shared_from_this());
 }
 
-std::string LeftBracket::toString() override {
+std::string LeftBracket::toString() {
     return "LeftBracket";
 }
 
-void RightBracket::accept(Visitor* visitor) override {
+void RightBracket::accept(Visitor* visitor) {
     visitor->visit(shared_from_this());
 }
 
-std::string RightBracket::toString() override {
+std::string RightBracket::toString() {
     return "RightBracket";
 }
 

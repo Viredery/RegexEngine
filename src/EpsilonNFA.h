@@ -2,8 +2,10 @@
 #define EPSILON_NFA_H_
 
 #include <tuple>
+#include <memory>
 
 #include "StateEdgePool.h"
+#include "Node.h"
 
 namespace Regex {
 
@@ -25,9 +27,9 @@ private:
     NFA::Substate character(std::shared_ptr<ElementNode> node);
     NFA::Substate Thompson(std::shared_ptr<Node> node);
         
-    inline State* getStartState(NFA::Substate s);
-	inline State* getEndState(NFA::Substate s);
-	inline NFA::Substate createSubstate(State *start, State *end);
+    State* getStartState(NFA::Substate s);
+	State* getEndState(NFA::Substate s);
+	NFA::Substate createSubstate(State *start, State *end);
 };
 
 

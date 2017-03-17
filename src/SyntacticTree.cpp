@@ -1,4 +1,6 @@
-#include "SyntacticTree"
+#include "SyntacticTree.h"
+
+#include <iostream>
 
 #include "PostfixExpressionVisitor.h"
 #include "TreeConstructionVisitor.h"
@@ -56,7 +58,7 @@ void SyntacticTree::scan() {
 			    itemTerminated = true;
 			    break;
 			case '{':
-			    //{m,} {,n} {m,n} {,}
+			    //{m,} {,n} {m,n} {,} {m}
 			    index = handleQuantifier(index);
                 itemTerminated = true;
 			    break;
@@ -143,15 +145,19 @@ int SyntacticTree::handleQuantifier(int index) {
     int minRepetition, maxRepetition;
     index = index + 1;
     std::size_t leftEnd = pattern.find_first_of(',', index);
+    std::size_t rightEnd = pattern.find_first_of('}', index);
+    if (leftEnd == std::string::npos || leftEnd > rightEnd) {
+        minRepetition = maxRepetition = std::stoi(pattern.substr(index, rightEnd - index));
+        nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition));
+        return rightEnd;
+    }
     std::string strMinRepetition = pattern.substr(index, leftEnd - index);
     minRepetition = strMinRepetition == "" ? 0 : std::stoi(strMinRepetition);
     index = leftEnd + 1;
-    std::size_t rightEnd = pattern.find_first_of('}', index);
     std::string strMaxRepetition = pattern.substr(index, rightEnd - index);
     maxRepetition = strMaxRepetition == "" ? -1 : std::stoi(strMaxRepetition);
-    index = rightEnd;
     nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition));
-    return index;
+    return rightEnd;
 }
 
 

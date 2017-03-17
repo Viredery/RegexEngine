@@ -139,19 +139,19 @@ NFA::Substate NFA::Thompson(std::shared_ptr<Node> node) {
 		throw -1;
 }
 
-State* NFA::getState(std::shared_ptr<Node> node) {
+inline State* NFA::getState(std::shared_ptr<Node> node) {
     return getStartState(Thompson(node));
 }
 
-State* getStartState(NFA::Substate s) {
+inline State* NFA::getStartState(NFA::Substate s) {
     return std::get<0>(s);
 }
 
-State* getEndState(NFA::Substate s) {
+inline State* NFA::getEndState(NFA::Substate s) {
     return std::get<1>(s);
 }
 
-NFA::Substate createSubstate(State *start, State *end) {
+NFA::Substate NFA::createSubstate(State *start, State *end) {
     return std::make_tuple(start, end);
 }
 

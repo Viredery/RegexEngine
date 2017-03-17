@@ -27,7 +27,8 @@ void State::setFinished() {
     finalState = true;
 }
 
-Edge::Edge(const std::string& s): elementSet(s), empty(false) {}
+Edge::Edge(const std::string& s):
+        elementSet(s), epsilon(false) {}
 
 void Edge::assign(State* start, State* end) {
 	this->start = start;

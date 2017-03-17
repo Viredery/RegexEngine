@@ -18,11 +18,11 @@ public:
     std::list<Edge *> inEdges;
     std::list<Edge *> outEdges;
     bool finalState = false;
-    inline void assignIn(Edge *e);
-    inline void assignOut(Edge *e);
-    inline void assignIn(std::initializer_list<Edge*> el);
-    inline void assignOut(std::initializer_list<Edge*> el);
-    inline void setFinished();
+    void assignIn(Edge *e);
+    void assignOut(Edge *e);
+    void assignIn(std::initializer_list<Edge*> el);
+    void assignOut(std::initializer_list<Edge*> el);
+    void setFinished();
 };
 
 class Edge {
@@ -33,7 +33,7 @@ public:
     State* start;
     State* end;
     bool epsilon = true;
-    inline void assign(State* start, State* end);
+    void assign(State* start, State* end);
 };
 
 class StateManagement {
