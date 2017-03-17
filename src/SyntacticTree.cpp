@@ -1,47 +1,23 @@
-#ifndef SYNTACTIC_TREE_CPP_
-#define SYNTACTIC_TREE_CPP_
+#include "SyntacticTree"
 
-#include <vector>
-#include <string>
-#include <iostream>
-#include <memory>
-#include "Node.hpp"
-#include "PostfixExpressionVisitor.hpp"
-#include "TreeConstructionVisitor.hpp"
-class SyntacticTree
-{
-public:
-	SyntacticTree(std::string pattern): 
-	    pattern(pattern) {}
-	~SyntacticTree() = default;
-    void toString() {
-    	for (auto node : nodeList)
-    		std::cout << node->toString() << " ";
-    	std::cout << std::endl;
-    }
-    void scan();
-    void constructTree();
+#include "PostfixExpressionVisitor.h"
+#include "TreeConstructionVisitor.h"
 
-    std::shared_ptr<Node> getTree() {
-        return root;
-    }
+namespace Regex {
 
-	SyntacticTree(SyntacticTree&) = delete;
-	SyntacticTree &operator=(const SyntacticTree&) = delete;
 
-    void printTree(std::shared_ptr<Node> root);
-private:
-    bool startRestriction = false;
-    bool endRestriction = true;
-    void handleCombiner(bool flag);
-    int handleElementSet(int index);
-    int handleQuantifier(int index);
+SyntacticTree::SyntacticTree(std::string pattern): 
+        pattern(pattern) {}
 
-    std::string pattern;
+std::shared_ptr<Node> SyntacticTree::getTree() {
+    return root;
+}
 
-    std::vector<std::shared_ptr<Node>> nodeList;
-    std::shared_ptr<Node> root = nullptr;
-};
+void SyntacticTree::toString() {
+	for (auto node : nodeList)
+		std::cout << node->toString() << " ";
+	std::cout << std::endl;
+}
 
 void SyntacticTree::printTree(std::shared_ptr<Node> root) {
     if (root == nullptr)
@@ -53,16 +29,6 @@ void SyntacticTree::printTree(std::shared_ptr<Node> root) {
     }
 }
 
-
-/* first, we handle these input:
- *   [^abcd],|,*,+,?,(),^,$,.,{n,m}
- * next:
- *   Grouping Construct
- * not:
- *   \s == [\f\n\r\t\v], \S, \d, \w, \D, \W
- *   Character Escapes, Anchor
- * No Syntax Inspection.
- */
 void SyntacticTree::scan() {
 	bool itemTerminated = false;
 	std::size_t index = 0;
@@ -130,30 +96,6 @@ void SyntacticTree::scan() {
 	}
 }
 
-/*
-  construct syntactic tree
-
-  method one:
-    1    RegEx -> B A
-    2    A -> OrNode B A
-    3      -> EmptyNode
-
-    4    B -> D C
-    5    C -> CombineNode D C
-    6      -> EmptyNode
-
-    7    D -> E F
-
-    8    E -> LeftBracket RegEx RightBracket
-    9      -> ElementNode
-
-    10   F -> ClosureNode
-    11     -> EmptyNode
-
-  method two: (USED)
-    visited pattern (stack)
-*/
-
 void SyntacticTree::constructTree()
 {
     PostfixExpressionVisitor pev;
@@ -168,7 +110,6 @@ void SyntacticTree::constructTree()
     root = tcv.getTree();
     nodeList.clear();
 }
-
 
 void SyntacticTree::handleCombiner(bool flag) {
     if (true == flag)
@@ -197,6 +138,7 @@ int SyntacticTree::handleElementSet(int index) {
     nodeList.push_back(elementSet);
     return index;
 }
+
 int SyntacticTree::handleQuantifier(int index) {
     int minRepetition, maxRepetition;
     index = index + 1;
@@ -211,13 +153,6 @@ int SyntacticTree::handleQuantifier(int index) {
     nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition));
     return index;
 }
-/*
-int main() {
-	//SyntacticTree st("[aeiou]{,4}[0-9]?");
-	SyntacticTree st("[aeiou]{,4}|[0-9]?(com|.?)a*");
-	st.scan();
-    st.constructTree();
-    st.toString();
-}
-*/
-#endif
+
+
+} // namespace Regex

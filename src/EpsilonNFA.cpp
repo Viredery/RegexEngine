@@ -1,39 +1,7 @@
-#ifndef EPSILON_NFA_H_
-#define EPSILON_NFA_H_
+#include "EpsilonNFA.h"
 
-#include <tuple>
+namespace Regex {
 
-#include "SyntacticTree.hpp"
-#include "StateEdgePool.hpp"
-
-class NFA {
-public:
-	NFA() = default;
-	~NFA() = default;
-    State* getState(std::shared_ptr<Node> node);
-private:
-	using Substate = std::tuple<State*, State*>;
-    StateManagement states;
-    EdgeManagement edges;
-	
-	NFA::Substate concat(NFA::Substate a, NFA::Substate b);
-	NFA::Substate alt(NFA::Substate a, NFA::Substate b);
-	NFA::Substate closureInfinite(NFA::Substate a);
-    NFA::Substate closureFinite(std::shared_ptr<ClosureNode> node, NFA::Substate a);
-    NFA::Substate character(std::shared_ptr<ElementNode> node);
-    NFA::Substate Thompson(std::shared_ptr<Node> node);
-        
-    inline State* getStartState(NFA::Substate s) {
-		return std::get<0>(s);
-	}
-	inline State* getEndState(NFA::Substate s) {
-		return std::get<1>(s);
-	}
-	inline NFA::Substate createSubstate(State *start, State *end) {
-		return std::make_tuple(start, end);
-	}
-
-};
 
 NFA::Substate NFA::character(std::shared_ptr<ElementNode> node) {
 	State* s1 = states.emplace_back();
@@ -72,6 +40,7 @@ NFA::Substate NFA::alt(NFA::Substate a, NFA::Substate b) {
     e4->assign(getEndState(b), s2);
     return createSubstate(s1, s2);
 }
+
 NFA::Substate NFA::closureInfinite(NFA::Substate a) {
 	State* s1 = states.emplace_back();
 	State* s2 = states.emplace_back();
@@ -89,8 +58,6 @@ NFA::Substate NFA::closureInfinite(NFA::Substate a) {
     e4->assign(getEndState(a), getStartState(a));
     return createSubstate(s1, s2);
 }
-
-
 
 NFA::Substate NFA::closureFinite(std::shared_ptr<ClosureNode> node, NFA::Substate a) {
     State* start = nullptr;
@@ -175,15 +142,18 @@ NFA::Substate NFA::Thompson(std::shared_ptr<Node> node) {
 State* NFA::getState(std::shared_ptr<Node> node) {
     return getStartState(Thompson(node));
 }
-/*
-int main() {
-	//SyntacticTree st("[aeiou]{2,8}|[0-9]{,4}(c|.?)a*");
-    SyntacticTree st("[aeiou]{,4}[0-9]?");
-    st.scan();
-    st.constructTree();
-    st.printTree(st.getTree());
-    NFA nfa;
-    nfa.getState(st.getTree());
-}*/
 
-#endif
+State* getStartState(NFA::Substate s) {
+    return std::get<0>(s);
+}
+
+State* getEndState(NFA::Substate s) {
+    return std::get<1>(s);
+}
+
+NFA::Substate createSubstate(State *start, State *end) {
+    return std::make_tuple(start, end);
+}
+
+
+} // namespace Regex

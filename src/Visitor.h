@@ -3,6 +3,9 @@
 
 #include <memory>
 
+namespace Regex {
+
+
 class ElementNode;
 class OrNode;
 class CombineNode;
@@ -23,4 +26,7 @@ public:
     virtual ~Visitor() = default;
 };
 
-#endif
+
+} //namespace Regex
+
+#endif // VISITOR_H_
