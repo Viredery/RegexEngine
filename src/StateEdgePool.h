@@ -3,7 +3,7 @@
 
 #include <list>
 #include <string>
-#include <bitset>
+#include <array>
 #include <initializer_list>
 
 namespace Regex {
@@ -27,12 +27,14 @@ public:
 
 class Edge {
 public:
-    explicit Edge(const std::string& s);
+    explicit Edge(const std::array<bool, 128>& arr);
+    explicit Edge(const int t);
     Edge() = default;
-    std::bitset<128> elementSet;
+    std::array<bool, 128> elementArr;
     State* start;
     State* end;
     bool epsilon = true;
+    int type = 0;
     void assign(State* start, State* end);
 };
 
@@ -50,7 +52,8 @@ public:
 	EdgeManagement() = default;
 	~EdgeManagement();
 	Edge* emplace_back();
-	Edge* emplace_back(const std::string& s);
+	Edge* emplace_back(const std::array<bool, 128>& arr);
+    Edge* emplace_back(const int t);
 private:
 	std::list<Edge*> edgeList;
 };

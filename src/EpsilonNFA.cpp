@@ -1,4 +1,7 @@
 #include "EpsilonNFA.h"
+#include "iostream"
+
+#include "Node.h"
 
 namespace Regex {
 
@@ -6,7 +9,7 @@ namespace Regex {
 NFA::Substate NFA::character(std::shared_ptr<ElementNode> node) {
 	State* s1 = states.emplace_back();
 	State* s2 = states.emplace_back();
-	Edge* e = edges.emplace_back(node->getElementString());
+	Edge* e = edges.emplace_back(node->getElementArray());
 	e->assign(s1, s2);
 	s1->assignOut(e);
 	s2->assignIn(e);
@@ -82,7 +85,17 @@ NFA::Substate NFA::closureFinite(std::shared_ptr<ClosureNode> node, NFA::Substat
         	preState = b;
         }
     }
-
+    if (nullptr == start && nullptr == getStartState(a)) {
+        State* s1 = states.emplace_back();
+        State* s2 = states.emplace_back();
+        Edge* e = edges.emplace_back();
+        s1->assignOut(e);
+        s2->assignIn(e);
+        e->assign(s1, s2);
+        return createSubstate(s1, s2);        
+    }
+    if (nullptr == start)
+        return a;
     if (nullptr != getStartState(a)) {
         Edge *e1 = edges.emplace_back();
         Edge *e2 = edges.emplace_back();
@@ -122,15 +135,23 @@ NFA::Substate NFA::Thompson(std::shared_ptr<Node> node) {
 		    for (int i = 1; i != cNode->getMinRepetition(); i++)
 			    curSubstate = concat(curSubstate, Thompson(cNode->getLeft()));
         }
+        NFA::Substate c = createSubstate(nullptr, nullptr);;
 		if (-1 == cNode->getMaxRepetition()) {
-		    NFA::Substate c = closureInfinite(Thompson(cNode->getLeft()));
+		    c = closureInfinite(Thompson(cNode->getLeft()));
 		    if (nullptr != getStartState(curSubstate))
 		        c = concat(curSubstate, c);
-		    return c;
 		} else {
-			NFA::Substate c = closureFinite(cNode, curSubstate);
-		    return c;
+            c = closureFinite(cNode, curSubstate);
 		}
+        State* s1 = states.emplace_back();
+        State* s2 = states.emplace_back();
+        Edge* e1 = edges.emplace_back(1);
+        Edge* e2 = edges.emplace_back(-1);
+        s1->assignOut(e1);
+        s2->assignIn(e2);
+        e1->assign(s1, getStartState(c));
+        e2->assign(getEndState(c), s2);
+        return createSubstate(s1, s2);
 	} else if(typeid(*node) == typeid(ElementNode)) {
 		std::shared_ptr<ElementNode> eNode = dynamic_cast<ElementNode*>(node.get())->shared_from_this();
 		NFA::Substate a = character(eNode);
@@ -139,15 +160,15 @@ NFA::Substate NFA::Thompson(std::shared_ptr<Node> node) {
 		throw -1;
 }
 
-inline State* NFA::getState(std::shared_ptr<Node> node) {
+State* NFA::getState(std::shared_ptr<Node> node) {
     return getStartState(Thompson(node));
 }
 
-inline State* NFA::getStartState(NFA::Substate s) {
+State* NFA::getStartState(NFA::Substate s) {
     return std::get<0>(s);
 }
 
-inline State* NFA::getEndState(NFA::Substate s) {
+State* NFA::getEndState(NFA::Substate s) {
     return std::get<1>(s);
 }
 

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <memory>
-#include <bitset>
+#include <array>
 
 #include "Visitor.h"
 
@@ -40,13 +40,16 @@ public:
 
 class ElementNode: public LeafNode, public std::enable_shared_from_this<ElementNode> {
 public:
-	ElementNode() = default;
+    ElementNode();
     void accept(Visitor* visitor) override;
     std::string toString() override;
     void setElement(char character);
+    void setElement(int pos);
     void inverse();
-    std::string getElementString();
-	std::bitset<128> elementSet;
+    void handleEscapeCharacter(char escapeCharacter);
+    std::array<bool, 128>& getElementArray();
+	std::array<bool, 128> elementArr;
+    bool inverseFlag = false;
 };
 
 class OrNode: public BranchNode, public std::enable_shared_from_this<OrNode> {
@@ -58,14 +61,14 @@ public:
 
 class CombineNode: public BranchNode, public std::enable_shared_from_this<CombineNode> {
 public:
-	CombineNode() = default;
+    CombineNode() = default;
     void accept(Visitor* visitor) override;
     std::string toString() override;
 };
 
 class ClosureNode: public BranchNode, public std::enable_shared_from_this<ClosureNode> {
 public:
-	ClosureNode(int minRep, int maxRep);
+    ClosureNode(int minRep, int maxRep);
     void accept(Visitor* visitor) override;
     std::string toString() override;
 

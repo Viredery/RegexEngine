@@ -26,10 +26,8 @@ public:
 
     void printTree(std::shared_ptr<Node> root);
 private:
-    bool startRestriction = false;
-    bool endRestriction = true;
     void handleCombiner(bool flag);
-    int handleElementSet(int index);
+    int handleElementArr(int index);
     int handleQuantifier(int index);
 
     std::string pattern;

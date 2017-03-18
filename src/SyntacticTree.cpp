@@ -38,7 +38,7 @@ void SyntacticTree::scan() {
 		switch (pattern[index]) {
 			case '[':
 				handleCombiner(itemTerminated);
-                index = handleElementSet(index);
+                index = handleElementArr(index);
 			    itemTerminated = true;
 			    break;
 			case '|':
@@ -71,25 +71,28 @@ void SyntacticTree::scan() {
 			    nodeList.push_back(std::make_shared<RightBracket>());
 			    itemTerminated = true;
 			    break;
-			case '^':
-			    startRestriction = true;
-			    break;
-			case '$':
-			    endRestriction = false;
-			    break;
 			case '.': {
 			    handleCombiner(itemTerminated);
-			    auto elementSet = std::make_shared<ElementNode>();
-                elementSet->inverse();
-			    nodeList.push_back(elementSet);
+			    auto elementArr = std::make_shared<ElementNode>();
+                for (int pos = 0; pos != 128; pos++)
+                	elementArr->setElement(pos);
+			    nodeList.push_back(elementArr);
 			    itemTerminated = true;
 			    break;
 			}
+			case '\\': {
+			    handleCombiner(itemTerminated);
+			    auto elementArr = std::make_shared<ElementNode>();
+                index = index + 1;
+                elementArr->handleEscapeCharacter(pattern[index]);
+			    nodeList.push_back(elementArr);
+			    itemTerminated = true;
+			}
 			default: {
 			    handleCombiner(itemTerminated);
-			    auto elementSet = std::make_shared<ElementNode>();
-                elementSet->setElement(pattern[index]);
-			    nodeList.push_back(elementSet);
+			    auto elementArr = std::make_shared<ElementNode>();
+                elementArr->setElement(pattern[index]);
+			    nodeList.push_back(elementArr);
 			    itemTerminated = true;
                 break;
 			}
@@ -118,26 +121,26 @@ void SyntacticTree::handleCombiner(bool flag) {
         nodeList.push_back(std::make_shared<CombineNode>());
 }
 
-int SyntacticTree::handleElementSet(int index) {
-	auto elementSet = std::make_shared<ElementNode>();
+int SyntacticTree::handleElementArr(int index) {
+	auto elementArr = std::make_shared<ElementNode>();
     if (pattern[++index] == '^') {
-    	elementSet->inverse();
+    	elementArr->inverse();
     	++index;
     }
-    while (pattern[index] != ']') {
-    	if (pattern[index + 1] == '-') {
-    		char character = pattern[index];
-    		while (character <= pattern[index + 2]) {
-    		    elementSet->setElement(character);
-    		    character++;
-    		}
+    while (']' != pattern[index]) {
+    	if ('\\' == pattern[index]) {
+            elementArr->handleEscapeCharacter(pattern[index + 1]);
+            index += 2;
+    	} else if ('-' == pattern[index + 1]) {
+    		for (char c = pattern[index]; c <= pattern[index + 2]; c++)
+    		    elementArr->setElement(c);
     	    index += 3;
     	} else {
-    		elementSet->setElement(pattern[index]);
+    		elementArr->setElement(pattern[index]);
     		index += 1;
     	}
     }
-    nodeList.push_back(elementSet);
+    nodeList.push_back(elementArr);
     return index;
 }
 

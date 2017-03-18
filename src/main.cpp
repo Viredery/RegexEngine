@@ -2,7 +2,10 @@
 #include "EpsilonNFA.h"
 
 int main() {
-	Regex::SyntacticTree st("d{242}f{431,533}f{431,}f{,533}f{,}");
+	Regex::SyntacticTree st("d{2}f{1,2}f{2,}ff{,}");
 	st.scan();
 	st.toString();
+    st.constructTree();
+	Regex::NFA nfa;
+	nfa.getState(st.getTree());
 }

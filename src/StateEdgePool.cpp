@@ -27,8 +27,13 @@ void State::setFinished() {
     finalState = true;
 }
 
-Edge::Edge(const std::string& s):
-        elementSet(s), epsilon(false) {}
+Edge::Edge(const std::array<bool, 128>& arr):
+        epsilon(false) {
+    std::copy(arr.begin(), arr.end(), elementArr.begin()); 
+}
+
+Edge::Edge(const int t):
+        type(t) {}
 
 void Edge::assign(State* start, State* end) {
 	this->start = start;
@@ -59,11 +64,16 @@ Edge* EdgeManagement::emplace_back() {
     return e;
 }
 
-Edge* EdgeManagement::emplace_back(const std::string& s) {
-    Edge *e = new Edge(s);
+Edge* EdgeManagement::emplace_back(const std::array<bool, 128>& arr) {
+    Edge *e = new Edge(arr);
     edgeList.push_back(e);
     return e;
 }
 
+Edge* EdgeManagement::emplace_back(const int t) {
+    Edge *e = new Edge(t);
+    edgeList.push_back(e);
+    return e;    
+}
 
 } // namespace Regex
