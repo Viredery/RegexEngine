@@ -5,12 +5,14 @@
 
 namespace Regex {
 
-
 class ElementNode;
 class OrNode;
 class CombineNode;
 class ClosureNode;
-class FunctionNode;
+class CaptureNode;
+class ExtensionNode;
+class PositivePrecheckNode;
+class NegativePrecheckNode;
 class LeftBracket;
 class RightBracket;
 
@@ -20,7 +22,10 @@ public:
     virtual void visit(std::shared_ptr<OrNode> node) = 0;
     virtual void visit(std::shared_ptr<CombineNode> node) = 0;
     virtual void visit(std::shared_ptr<ClosureNode> node) = 0;
-    virtual void visit(std::shared_ptr<FunctionNode> node) = 0;
+    virtual void visit(std::shared_ptr<CaptureNode> node) = 0;
+    virtual void visit(std::shared_ptr<ExtensionNode> node) = 0;
+    virtual void visit(std::shared_ptr<PositivePrecheckNode> node) = 0;
+    virtual void visit(std::shared_ptr<NegativePrecheckNode> node) = 0;
     virtual void visit(std::shared_ptr<LeftBracket> node) = 0;
     virtual void visit(std::shared_ptr<RightBracket> node) = 0;
     virtual ~Visitor() = default;

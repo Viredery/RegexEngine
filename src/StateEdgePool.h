@@ -27,15 +27,19 @@ public:
 
 class Edge {
 public:
+    enum class Type {
+        LOOP, END, POSITIVE, NEGATIVE, CAPTURE, HEAD, TAIL, CHECK, NORMAL
+    };
     explicit Edge(const std::array<bool, 128>& arr);
-    explicit Edge(const int t);
     Edge() = default;
     std::array<bool, 128> elementArr;
     State* start;
     State* end;
     bool epsilon = true;
-    int type = 0;
+    Type type = Type::NORMAL;
+    
     void assign(State* start, State* end);
+
 };
 
 class StateManagement {
@@ -53,7 +57,6 @@ public:
 	~EdgeManagement();
 	Edge* emplace_back();
 	Edge* emplace_back(const std::array<bool, 128>& arr);
-    Edge* emplace_back(const int t);
 private:
 	std::list<Edge*> edgeList;
 };

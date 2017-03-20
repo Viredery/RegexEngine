@@ -32,9 +32,6 @@ Edge::Edge(const std::array<bool, 128>& arr):
     std::copy(arr.begin(), arr.end(), elementArr.begin()); 
 }
 
-Edge::Edge(const int t):
-        type(t) {}
-
 void Edge::assign(State* start, State* end) {
 	this->start = start;
 	this->end = end;
@@ -70,10 +67,5 @@ Edge* EdgeManagement::emplace_back(const std::array<bool, 128>& arr) {
     return e;
 }
 
-Edge* EdgeManagement::emplace_back(const int t) {
-    Edge *e = new Edge(t);
-    edgeList.push_back(e);
-    return e;    
-}
 
 } // namespace Regex

@@ -143,15 +143,7 @@ NFA::Substate NFA::Thompson(std::shared_ptr<Node> node) {
 		} else {
             c = closureFinite(cNode, curSubstate);
 		}
-        State* s1 = states.emplace_back();
-        State* s2 = states.emplace_back();
-        Edge* e1 = edges.emplace_back(1);
-        Edge* e2 = edges.emplace_back(-1);
-        s1->assignOut(e1);
-        s2->assignIn(e2);
-        e1->assign(s1, getStartState(c));
-        e2->assign(getEndState(c), s2);
-        return createSubstate(s1, s2);
+        return c;
 	} else if(typeid(*node) == typeid(ElementNode)) {
 		std::shared_ptr<ElementNode> eNode = dynamic_cast<ElementNode*>(node.get())->shared_from_this();
 		NFA::Substate a = character(eNode);

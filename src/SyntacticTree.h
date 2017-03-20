@@ -29,7 +29,7 @@ private:
     void handleCombiner(bool flag);
     int handleElementArr(int index);
     int handleQuantifier(int index);
-
+    int handleLeftBracket(int index);
     std::string pattern;
     std::vector<std::shared_ptr<Node>> nodeList;
     std::shared_ptr<Node> root = nullptr;

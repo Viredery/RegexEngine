@@ -73,7 +73,7 @@ void ClosureNode::accept(Visitor* visitor) {
 
 std::string ClosureNode::toString() {
     std::string res("");
-    res = res + "ClosureNode: " + std::to_string(minRepetition) + " " + std::to_string(maxRepetition);
+    res = res + "ClosureNode(" + std::to_string(minRepetition) + "," + std::to_string(maxRepetition) + ")";
     return res;
 }
 
@@ -85,16 +85,36 @@ int ClosureNode::getMaxRepetition() const {
     return maxRepetition;
 }
 
-void FunctionNode::accept(Visitor* visitor) {
+void CaptureNode::accept(Visitor* visitor) {
     visitor->visit(shared_from_this());
 }
 
-std::string FunctionNode::toString() {
-    return "FunctionNode";
+std::string CaptureNode::toString() {
+    return "CaptureNode";
 }
 
-void LeftBracket::accept(Visitor* visitor) {
+void ExtensionNode::accept(Visitor* visitor) {
     visitor->visit(shared_from_this());
+}
+
+std::string ExtensionNode::toString() {
+    return "ExtensionNode";
+}
+
+void PositivePrecheckNode::accept(Visitor* visitor) {
+    visitor->visit(shared_from_this());
+}
+
+std::string PositivePrecheckNode::toString() {
+    return "PositivePrecheckNode";
+}
+
+void NegativePrecheckNode::accept(Visitor* visitor) {
+    visitor->visit(shared_from_this());
+}
+
+std::string NegativePrecheckNode::toString() {
+    return "NegativePrecheckNode";
 }
 
 std::string LeftBracket::toString() {
@@ -142,6 +162,7 @@ void ElementNode::handleEscapeCharacter(char escapeCharacter) {
                 setElement(c);
             for (char c = '0'; c <= '9'; c++)
                 setElement(c);
+            setElement('_');
             break;
         case 'd':
             for (char c = '0'; c <= '9'; c++)
@@ -149,16 +170,22 @@ void ElementNode::handleEscapeCharacter(char escapeCharacter) {
             break;
         case 's':
             setElement(' ');
-            setElement(0x9);
-            setElement(0xA);
+            setElement('\f');
+            setElement('\n');
+            setElement('\r');
+            setElement('\t');
+            setElement('\v');
             break;
         case 'W':
             for (int pos = 0; pos != int('0'); pos++)
                 setElement(pos);
             for (int pos = int('9') + 1; pos != int('A'); pos++)
                 setElement(pos);
-            for (int pos = int('Z') + 1; pos != int('a'); pos++)
+            for (int pos = int('Z') + 1; pos != int('a'); pos++) {
+                if (int('_') == pos)
+                    continue;
                 setElement(pos);
+            }
             for (int pos = int('z') + 1; pos != 128; pos++)
                 setElement(pos);
             break;
@@ -170,7 +197,8 @@ void ElementNode::handleEscapeCharacter(char escapeCharacter) {
             break;
         case 'S':
             for (int pos = 0; pos != 128; pos++) {
-                if (int(' ') == pos || 0x9 == pos || 0xA == pos )
+                if (int(' ') == pos || int('\f') == pos || int('\n') == pos ||
+                        int('\r') == pos || int('\t') == pos || int('\v') == pos)
                     continue;
                 setElement(pos);
             }
@@ -223,6 +251,11 @@ void ElementNode::handleEscapeCharacter(char escapeCharacter) {
         default:
             throw -1;
     }
+}
+
+std::ostream &operator<<(std::ostream &os, const std::shared_ptr<Node> node) {
+    os << node->toString();
+    return os;
 }
 
 

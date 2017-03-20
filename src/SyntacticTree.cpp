@@ -17,7 +17,7 @@ std::shared_ptr<Node> SyntacticTree::getTree() {
 
 void SyntacticTree::toString() {
 	for (auto node : nodeList)
-		std::cout << node->toString() << " ";
+		std::cout << node << " ";
 	std::cout << std::endl;
 }
 
@@ -25,7 +25,7 @@ void SyntacticTree::printTree(std::shared_ptr<Node> root) {
     if (root == nullptr)
         std::cout << "nullptr ";
     else {
-        std::cout << root->toString() << " ";
+        std::cout << root << " ";
         printTree(root->getLeft());
         printTree(root->getRight());
     }
@@ -64,7 +64,7 @@ void SyntacticTree::scan() {
 			    break;
 			case '(':
 			    handleCombiner(itemTerminated);
-			    nodeList.push_back(std::make_shared<LeftBracket>());
+			    index = handleLeftBracket(index);
 			    itemTerminated = false;
 			    break;
 			case ')':
@@ -161,6 +161,20 @@ int SyntacticTree::handleQuantifier(int index) {
     maxRepetition = strMaxRepetition == "" ? -1 : std::stoi(strMaxRepetition);
     nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition));
     return rightEnd;
+}
+
+int SyntacticTree::handleLeftBracket(int index) {
+    if ('?' != pattern[index + 1]) {
+    	nodeList.push_back(std::make_shared<CaptureNode>());
+        return index;
+    } else if (':' == pattern[index + 2]) {
+    	nodeList.push_back(std::make_shared<ExtensionNode>());
+    } else if ('=' == pattern[index + 2]) {
+    	nodeList.push_back(std::make_shared<PositivePrecheckNode>());
+    } else if ('!' == pattern[index + 2]) {
+    	nodeList.push_back(std::make_shared<NegativePrecheckNode>());
+    }
+    return index + 2;
 }
 
 

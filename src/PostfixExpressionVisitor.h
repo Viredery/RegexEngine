@@ -17,7 +17,10 @@ public:
     void visit(std::shared_ptr<OrNode> node) override;
     void visit(std::shared_ptr<CombineNode> node) override;
     void visit(std::shared_ptr<ClosureNode> node) override;
-    void visit(std::shared_ptr<FunctionNode> node) override;
+    void visit(std::shared_ptr<CaptureNode> node) override;
+    void visit(std::shared_ptr<ExtensionNode> node) override;
+    void visit(std::shared_ptr<PositivePrecheckNode> node) override;
+    void visit(std::shared_ptr<NegativePrecheckNode> node) override;
     void visit(std::shared_ptr<LeftBracket> node) override;
     void visit(std::shared_ptr<RightBracket> node) override;
 

@@ -26,13 +26,26 @@ void TreeConstructionVisitor::visit(std::shared_ptr<ClosureNode> node) {
     constructLeftChildTree(node);
 }
 
-void TreeConstructionVisitor::visit(std::shared_ptr<FunctionNode> node) {
-    throw -1;
-}
-
 void TreeConstructionVisitor::visit(std::shared_ptr<LeftBracket> node) {
     throw -1;
 }
+
+void TreeConstructionVisitor::visit(std::shared_ptr<CaptureNode> node) {
+    constructLeftChildTree(node);
+}
+
+void TreeConstructionVisitor::visit(std::shared_ptr<ExtensionNode> node) {
+    throw -1;
+}
+
+void TreeConstructionVisitor::visit(std::shared_ptr<PositivePrecheckNode> node) {
+    constructLeftChildTree(node);
+}
+
+void TreeConstructionVisitor::visit(std::shared_ptr<NegativePrecheckNode> node) {
+    constructLeftChildTree(node);
+}
+
 
 void TreeConstructionVisitor::visit(std::shared_ptr<RightBracket> node) {
     throw -1;
