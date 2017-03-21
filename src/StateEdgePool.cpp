@@ -32,6 +32,9 @@ Edge::Edge(const std::array<bool, 128>& arr):
     std::copy(arr.begin(), arr.end(), elementArr.begin()); 
 }
 
+Edge::Edge(Type t):
+        type(t) {}
+
 void Edge::assign(State* start, State* end) {
 	this->start = start;
 	this->end = end;
@@ -63,6 +66,12 @@ Edge* EdgeManagement::emplace_back() {
 
 Edge* EdgeManagement::emplace_back(const std::array<bool, 128>& arr) {
     Edge *e = new Edge(arr);
+    edgeList.push_back(e);
+    return e;
+}
+
+Edge* EdgeManagement::emplace_back(Edge::Type t) {
+    Edge *e = new Edge(t);
     edgeList.push_back(e);
     return e;
 }

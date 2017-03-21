@@ -32,6 +32,7 @@ public:
     };
     explicit Edge(const std::array<bool, 128>& arr);
     Edge() = default;
+    Edge(Type t);
     std::array<bool, 128> elementArr;
     State* start;
     State* end;
@@ -57,6 +58,7 @@ public:
 	~EdgeManagement();
 	Edge* emplace_back();
 	Edge* emplace_back(const std::array<bool, 128>& arr);
+    Edge* emplace_back(Edge::Type t);
 private:
 	std::list<Edge*> edgeList;
 };

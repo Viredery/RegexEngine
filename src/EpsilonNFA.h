@@ -22,14 +22,17 @@ private:
 	
 	NFA::Substate concat(NFA::Substate a, NFA::Substate b);
 	NFA::Substate alt(NFA::Substate a, NFA::Substate b);
-	NFA::Substate closureInfinite(NFA::Substate a);
-    NFA::Substate closureFinite(std::shared_ptr<ClosureNode> node, NFA::Substate a);
+	NFA::Substate repeat(std::shared_ptr<Node> node, int repetition);
+	NFA::Substate closureInfinite(std::shared_ptr<Node> node);
+    NFA::Substate closureFinite(std::shared_ptr<Node> node, int repetition);
     NFA::Substate character(std::shared_ptr<ElementNode> node);
     NFA::Substate Thompson(std::shared_ptr<Node> node);
-        
+
     State* getStartState(NFA::Substate s);
 	State* getEndState(NFA::Substate s);
 	NFA::Substate createSubstate(State *start, State *end);
+
+    NFA::Substate setLoopFlag(NFA::Substate a);
 };
 
 
