@@ -27,9 +27,9 @@ public:
     void printTree(std::shared_ptr<Node> root);
 private:
     void handleCombiner(bool flag);
-    int handleElementArr(int index);
-    int handleQuantifier(int index);
-    int handleLeftBracket(int index);
+    std::size_t handleElementArr(std::size_t index);
+    std::size_t handleQuantifier(std::size_t index);
+    std::size_t handleLeftBracket(std::size_t index);
     std::string pattern;
     std::vector<std::shared_ptr<Node>> nodeList;
     std::shared_ptr<Node> root = nullptr;

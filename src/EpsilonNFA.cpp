@@ -60,25 +60,32 @@ NFA::Substate NFA::repeat(std::shared_ptr<Node> node, int repetition) {
     return curSubState;
 }
 
-NFA::Substate NFA::closureInfinite(std::shared_ptr<Node> node) {
+NFA::Substate NFA::closureInfinite(std::shared_ptr<Node> node, bool greedy) {
     NFA::Substate a = Thompson(node->getLeft());
-	State* s = states.emplace_back();
-    Edge* e1 = edges.emplace_back();
-    Edge* e2 = edges.emplace_back();
-    s->assignOut(e1);
-    s->assignIn(e2);
+	State* s1 = states.emplace_back();
+
+    Edge* e1 = edges.emplace_back(greedy);
+    Edge* e2 = edges.emplace_back(greedy);
+    s1->assignOut(e1);
+    s1->assignIn(e2);
     getStartState(a)->assignIn(e1);
     getEndState(a)->assignOut(e2);
-    e1->assign(s, getStartState(a));
-    e2->assign(getEndState(a), s);
-    return createSubstate(s, s);
+    e1->assign(s1, getStartState(a));
+    e2->assign(getEndState(a), s1);
+    
+    State* s2 = states.emplace_back();
+    Edge* e3 = edges.emplace_back(!greedy);
+    s1->assignOut(e3);
+    s2->assignIn(e3);
+    e3->assign(s1, s2);
+    return createSubstate(s1, s2);
 }
 
-NFA::Substate NFA::closureFinite(std::shared_ptr<Node> node, int repetition) {
+NFA::Substate NFA::closureFinite(std::shared_ptr<Node> node, int repetition, bool greedy) {
     State *startState = nullptr, *endState = states.emplace_back(), *preEndState = nullptr;
     for (int i = 0; i != repetition; i++) {
         NFA::Substate a = Thompson(node->getLeft());
-        Edge *e = edges.emplace_back();
+        Edge *e = edges.emplace_back(!greedy);
         getEndState(a)->assignOut(e);
         endState->assignIn(e);
         e->assign(getEndState(a), endState);
@@ -86,7 +93,7 @@ NFA::Substate NFA::closureFinite(std::shared_ptr<Node> node, int repetition) {
             startState = getStartState(a);
         	preEndState = getEndState(a);
         } else {
-        	Edge *e = edges.emplace_back();
+        	Edge *e = edges.emplace_back(greedy);
         	preEndState->assignOut(e);
         	getStartState(a)->assignIn(e);
         	e->assign(preEndState, getStartState(a));
@@ -97,39 +104,61 @@ NFA::Substate NFA::closureFinite(std::shared_ptr<Node> node, int repetition) {
 }
 
 NFA::Substate NFA::Thompson(std::shared_ptr<Node> node) {
-	if(typeid(*node) == typeid(OrNode)) {
+	if (typeid(*node) == typeid(OrNode)) {
 		NFA::Substate a = Thompson(node->getLeft());
 		NFA::Substate b = Thompson(node->getRight());
 		return alt(a, b);
-	} else if(typeid(*node) == typeid(CombineNode)) {
+	} else if (typeid(*node) == typeid(CombineNode)) {
 		NFA::Substate a = Thompson(node->getLeft());
 		NFA::Substate b = Thompson(node->getRight());
 		return concat(a, b);
-	} else if(typeid(*node) == typeid(ClosureNode)) {
+	} else if (typeid(*node) == typeid(ClosureNode)) {
 		std::shared_ptr<ClosureNode> cNode = dynamic_cast<ClosureNode*>(node.get())->shared_from_this();
         int minRepetition = cNode->getMinRepetition(), maxRepetition = cNode->getMaxRepetition();
+        bool greedy = cNode->getGreedy();
         NFA::Substate a = repeat(node, minRepetition);
         if (minRepetition == maxRepetition)
             return a;
-        NFA::Substate b = (maxRepetition == -1) ? closureInfinite(node) : 
-                closureFinite(node, maxRepetition - minRepetition);
-        NFA::Substate c = concat(a, b);
+        NFA::Substate b = (maxRepetition == -1) ? closureInfinite(node, greedy) : 
+                closureFinite(node, maxRepetition - minRepetition, greedy);
+        //NFA::Substate c = concat(a, b);
         if (maxRepetition != -1) {
-            Edge *e = edges.emplace_back();
-            e->assign(getEndState(a), getEndState(b));
+            Edge *e1 = edges.emplace_back(!greedy);
+            e1->assign(getEndState(a), getEndState(b));
+            getEndState(a)->assignOut(e1);
+            getEndState(b)->assignIn(e1);
+
+            Edge* e2 = edges.emplace_back(greedy);
+            e2->assign(getEndState(a), getStartState(b));
+            getStartState(b)->assignIn(e2);
+            getEndState(a)->assignOut(e2);
+        } else {
+            Edge* e = edges.emplace_back();
+            e->assign(getEndState(a), getStartState(b));
+            getStartState(b)->assignIn(e);
             getEndState(a)->assignOut(e);
-            getEndState(b)->assignIn(e);
         }
-        return setLoopFlag(c);
-	} else if(typeid(*node) == typeid(ElementNode)) {
+        return setLoopFlag(createSubstate(getStartState(a), getEndState(b)));
+	} else if (typeid(*node) == typeid(ElementNode)) {
 		std::shared_ptr<ElementNode> eNode = dynamic_cast<ElementNode*>(node.get())->shared_from_this();
 		return character(eNode);
-	} else
+	} else if (typeid(*node) == typeid(CaptureNode)) {
+        NFA::Substate a = Thompson(node->getLeft());
+        return setCaptureFlag(a);
+    } else if (typeid(*node) == typeid(PositivePrecheckNode)) {
+        NFA::Substate a = Thompson(node->getLeft());
+        return setPositivePrecheckFlag(a);
+    } else if (typeid(*node) == typeid(NegativePrecheckNode)) {
+        NFA::Substate a = Thompson(node->getLeft());
+        return setNegativePrecheckFlag(a);
+    } else
 		throw -1;
 }
 
 State* NFA::getState(std::shared_ptr<Node> node) {
-    return getStartState(Thompson(node));
+    NFA::Substate a = Thompson(node);
+    getEndState(a)->setFinished();
+    return getStartState(a);
 }
 
 State* NFA::getStartState(NFA::Substate s) {
@@ -155,6 +184,42 @@ NFA::Substate NFA::setLoopFlag(NFA::Substate a) {
     getEndState(a)->assignOut(e2);
     e1->assign(s1, getStartState(a));
     e2->assign(getEndState(a), s2);
+    return createSubstate(s1, s2);
+}
+
+NFA::Substate NFA::setCaptureFlag(NFA::Substate a) {
+    State* s1 = states.emplace_back();
+    State* s2 = states.emplace_back();
+    Edge* e1 = edges.emplace_back(Edge::Type::CAPTURE);
+    Edge* e2 = edges.emplace_back(Edge::Type::END);
+    s1->assignOut(e1);
+    s2->assignIn(e2);
+    getStartState(a)->assignIn(e1);
+    getEndState(a)->assignOut(e2);
+    e1->assign(s1, getStartState(a));
+    e2->assign(getEndState(a), s2);
+    return createSubstate(s1, s2);
+}
+
+NFA::Substate NFA::setPositivePrecheckFlag(NFA::Substate a) {
+    State* s1 = states.emplace_back();
+    State* s2 = states.emplace_back();
+    Edge* e = edges.emplace_back(Edge::Type::POSITIVE, getStartState(a));
+    getEndState(a)->setFinished();
+    s1->assignOut(e);
+    s2->assignIn(e);
+    e->assign(s1, s2);
+    return createSubstate(s1, s2);
+}
+
+NFA::Substate NFA::setNegativePrecheckFlag(NFA::Substate a) {
+    State* s1 = states.emplace_back();
+    State* s2 = states.emplace_back();
+    Edge* e = edges.emplace_back(Edge::Type::NEGATIVE, getStartState(a));
+    getEndState(a)->setFinished();
+    s1->assignOut(e);
+    s2->assignIn(e);
+    e->assign(s1, s2);
     return createSubstate(s1, s2);
 }
 

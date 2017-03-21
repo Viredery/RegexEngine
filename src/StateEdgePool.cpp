@@ -32,13 +32,19 @@ Edge::Edge(const std::array<bool, 128>& arr):
     std::copy(arr.begin(), arr.end(), elementArr.begin()); 
 }
 
-Edge::Edge(Type t):
+Edge::Edge(const bool weight):
+        type(Type::WEIGHTED), weighted(weight) {}
+
+Edge::Edge(const Type t):
         type(t) {}
 
 void Edge::assign(State* start, State* end) {
 	this->start = start;
 	this->end = end;
 }
+
+FunctionEdge::FunctionEdge(Type t, State *start):
+    Edge(t), subStateStart(start) {}
 
 StateManagement::~StateManagement() {
 	std::for_each(stateList.begin(), stateList.end(), 
@@ -70,11 +76,22 @@ Edge* EdgeManagement::emplace_back(const std::array<bool, 128>& arr) {
     return e;
 }
 
-Edge* EdgeManagement::emplace_back(Edge::Type t) {
+Edge* EdgeManagement::emplace_back(const bool weight) {
+    Edge *e = new Edge(weight);
+    edgeList.push_back(e);
+    return e;   
+}
+
+Edge* EdgeManagement::emplace_back(const Edge::Type t) {
     Edge *e = new Edge(t);
     edgeList.push_back(e);
     return e;
 }
 
+Edge* EdgeManagement::emplace_back(const Edge::Type t, State *start) {
+    Edge *e = new FunctionEdge(t, start);
+    edgeList.push_back(e);
+    return e;
+}
 
 } // namespace Regex

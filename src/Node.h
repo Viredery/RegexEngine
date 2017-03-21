@@ -78,13 +78,15 @@ private:
 
 class ClosureNode: public BranchNode, public std::enable_shared_from_this<ClosureNode> {
 public:
-    ClosureNode(int minRep, int maxRep);
+    ClosureNode(int minRep, int maxRep, bool grd);
     void accept(Visitor* visitor) override;
 
     int getMinRepetition() const;
     int getMaxRepetition() const;
+    bool getGreedy() const;
     int minRepetition;
     int maxRepetition;
+    bool greedy;
 private:
     std::string toString() override;
 };

@@ -23,7 +23,7 @@ void SyntacticTree::toString() {
 
 void SyntacticTree::printTree(std::shared_ptr<Node> root) {
     if (root == nullptr)
-        std::cout << "nullptr ";
+        return;
     else {
         std::cout << root << " ";
         printTree(root->getLeft());
@@ -46,15 +46,30 @@ void SyntacticTree::scan() {
 			    itemTerminated = false;
 			    break;
 			case '+':
-			    nodeList.push_back(std::make_shared<ClosureNode>(1, -1));
+                if (index + 1 != pattern.size() && '?' == pattern[index + 1]) {
+                    nodeList.push_back(std::make_shared<ClosureNode>(1, -1, false));
+                    index = index + 1;
+                } else {
+                    nodeList.push_back(std::make_shared<ClosureNode>(1, -1, true));
+                }
 			    itemTerminated = true;
 			    break;
 			case '?':
-			    nodeList.push_back(std::make_shared<ClosureNode>(0, 1));
+                if (index + 1 != pattern.size() && '?' == pattern[index + 1]) {
+                    nodeList.push_back(std::make_shared<ClosureNode>(0, 1, false));
+                    index = index + 1;
+                } else {
+                    nodeList.push_back(std::make_shared<ClosureNode>(0, 1, true));
+                }
 			    itemTerminated = true;
 			    break;
 			case '*':
-			    nodeList.push_back(std::make_shared<ClosureNode>(0, -1));
+                if (index + 1 != pattern.size() && '?' == pattern[index + 1]) {
+                    nodeList.push_back(std::make_shared<ClosureNode>(0, -1, false));
+                    index = index + 1;
+                } else {
+                    nodeList.push_back(std::make_shared<ClosureNode>(0, -1, true));
+                }
 			    itemTerminated = true;
 			    break;
 			case '{':
@@ -121,7 +136,7 @@ void SyntacticTree::handleCombiner(bool flag) {
         nodeList.push_back(std::make_shared<CombineNode>());
 }
 
-int SyntacticTree::handleElementArr(int index) {
+std::size_t SyntacticTree::handleElementArr(std::size_t index) {
 	auto elementArr = std::make_shared<ElementNode>();
     if (pattern[++index] == '^') {
     	elementArr->inverse();
@@ -144,14 +159,18 @@ int SyntacticTree::handleElementArr(int index) {
     return index;
 }
 
-int SyntacticTree::handleQuantifier(int index) {
+std::size_t SyntacticTree::handleQuantifier(std::size_t index) {
     int minRepetition, maxRepetition;
     index = index + 1;
     std::size_t leftEnd = pattern.find_first_of(',', index);
     std::size_t rightEnd = pattern.find_first_of('}', index);
     if (leftEnd == std::string::npos || leftEnd > rightEnd) {
         minRepetition = maxRepetition = std::stoi(pattern.substr(index, rightEnd - index));
-        nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition));
+        if (rightEnd + 1 != pattern.size() && '?' == pattern[rightEnd + 1]) {
+            nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition, false));
+            rightEnd = rightEnd + 1;
+        } else
+            nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition, true));
         return rightEnd;
     }
     std::string strMinRepetition = pattern.substr(index, leftEnd - index);
@@ -159,11 +178,15 @@ int SyntacticTree::handleQuantifier(int index) {
     index = leftEnd + 1;
     std::string strMaxRepetition = pattern.substr(index, rightEnd - index);
     maxRepetition = strMaxRepetition == "" ? -1 : std::stoi(strMaxRepetition);
-    nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition));
+    if (rightEnd + 1 != pattern.size() && '?' == pattern[rightEnd + 1]) {
+        nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition, false));
+        rightEnd = rightEnd + 1;
+    } else
+        nodeList.push_back(std::make_shared<ClosureNode>(minRepetition, maxRepetition, true));
     return rightEnd;
 }
 
-int SyntacticTree::handleLeftBracket(int index) {
+std::size_t SyntacticTree::handleLeftBracket(std::size_t index) {
     if ('?' != pattern[index + 1]) {
     	nodeList.push_back(std::make_shared<CaptureNode>());
         return index;

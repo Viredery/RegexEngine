@@ -23,8 +23,8 @@ private:
 	NFA::Substate concat(NFA::Substate a, NFA::Substate b);
 	NFA::Substate alt(NFA::Substate a, NFA::Substate b);
 	NFA::Substate repeat(std::shared_ptr<Node> node, int repetition);
-	NFA::Substate closureInfinite(std::shared_ptr<Node> node);
-    NFA::Substate closureFinite(std::shared_ptr<Node> node, int repetition);
+	NFA::Substate closureInfinite(std::shared_ptr<Node> node, bool greedy);
+    NFA::Substate closureFinite(std::shared_ptr<Node> node, int repetition, bool greedy);
     NFA::Substate character(std::shared_ptr<ElementNode> node);
     NFA::Substate Thompson(std::shared_ptr<Node> node);
 
@@ -33,6 +33,9 @@ private:
 	NFA::Substate createSubstate(State *start, State *end);
 
     NFA::Substate setLoopFlag(NFA::Substate a);
+    NFA::Substate setCaptureFlag(NFA::Substate a);
+    NFA::Substate setPositivePrecheckFlag(NFA::Substate a);
+    NFA::Substate setNegativePrecheckFlag(NFA::Substate a);
 };
 
 

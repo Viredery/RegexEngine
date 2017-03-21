@@ -64,17 +64,20 @@ std::string CombineNode::toString() {
     return "CombineNode";
 }
 
-ClosureNode::ClosureNode(int minRep, int maxRep):
-        minRepetition(minRep), maxRepetition(maxRep) {}
+ClosureNode::ClosureNode(int minRep, int maxRep, bool grd):
+        minRepetition(minRep), maxRepetition(maxRep), greedy(grd) {}
 
 void ClosureNode::accept(Visitor* visitor) {
     visitor->visit(shared_from_this());
 }
 
 std::string ClosureNode::toString() {
-    std::string res("");
-    res = res + "ClosureNode(" + std::to_string(minRepetition) + "," + std::to_string(maxRepetition) + ")";
-    return res;
+    return std::string("ClosureNode(") + std::to_string(minRepetition) + "," + 
+            std::to_string(maxRepetition) + "," + ( greedy ? "G" : "N" ) + ")";
+}
+
+bool ClosureNode::getGreedy() const {
+    return greedy;
 }
 
 int ClosureNode::getMinRepetition() const {

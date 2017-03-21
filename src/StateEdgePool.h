@@ -28,19 +28,27 @@ public:
 class Edge {
 public:
     enum class Type {
-        LOOP, END, POSITIVE, NEGATIVE, CAPTURE, HEAD, TAIL, CHECK, NORMAL
+        LOOP, END, POSITIVE, NEGATIVE, CAPTURE, HEAD, TAIL, WEIGHTED, NORMAL
     };
     explicit Edge(const std::array<bool, 128>& arr);
     Edge() = default;
-    Edge(Type t);
+    Edge(const bool weight);
+    Edge(const Type t);
     std::array<bool, 128> elementArr;
     State* start;
     State* end;
     bool epsilon = true;
+    bool weighted = false;
     Type type = Type::NORMAL;
     
     void assign(State* start, State* end);
 
+};
+
+class FunctionEdge: public Edge {
+public:
+    FunctionEdge(const Type t, State *start);
+    State *subStateStart;
 };
 
 class StateManagement {
@@ -58,7 +66,9 @@ public:
 	~EdgeManagement();
 	Edge* emplace_back();
 	Edge* emplace_back(const std::array<bool, 128>& arr);
-    Edge* emplace_back(Edge::Type t);
+    Edge* emplace_back(const bool weight);
+    Edge* emplace_back(const Edge::Type t);
+    Edge* emplace_back(const Edge::Type t, State *start);
 private:
 	std::list<Edge*> edgeList;
 };

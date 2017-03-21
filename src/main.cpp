@@ -5,7 +5,7 @@
 #include "Node.h"
 #include <iostream>
 int main() {
-	Regex::SyntacticTree st("d{2,4}[0-9]");
+	Regex::SyntacticTree st("d{2,4}?(0-9)*?[\\w]+");
 	st.scan();
 	st.toString();
 	
