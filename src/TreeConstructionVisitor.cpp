@@ -1,5 +1,7 @@
 #include "TreeConstructionVisitor.h"
 
+#include <exception>
+
 namespace Regex {
 
 
@@ -27,7 +29,7 @@ void TreeConstructionVisitor::visit(std::shared_ptr<ClosureNode> node) {
 }
 
 void TreeConstructionVisitor::visit(std::shared_ptr<LeftBracket> node) {
-    throw -1;
+    throw std::invalid_argument("ERROR TYPE");
 }
 
 void TreeConstructionVisitor::visit(std::shared_ptr<CaptureNode> node) {
@@ -35,7 +37,7 @@ void TreeConstructionVisitor::visit(std::shared_ptr<CaptureNode> node) {
 }
 
 void TreeConstructionVisitor::visit(std::shared_ptr<ExtensionNode> node) {
-    throw -1;
+    throw std::invalid_argument("ERROR TYPE");
 }
 
 void TreeConstructionVisitor::visit(std::shared_ptr<PositivePrecheckNode> node) {
@@ -48,7 +50,7 @@ void TreeConstructionVisitor::visit(std::shared_ptr<NegativePrecheckNode> node) 
 
 
 void TreeConstructionVisitor::visit(std::shared_ptr<RightBracket> node) {
-    throw -1;
+    throw std::invalid_argument("ERROR TYPE");
 }
 
 void TreeConstructionVisitor::constructTwoChildTree(std::shared_ptr<Node> node) {

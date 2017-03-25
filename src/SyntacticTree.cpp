@@ -143,17 +143,17 @@ std::size_t SyntacticTree::handleElementArr(std::size_t index) {
     	++index;
     }
     while (']' != pattern[index]) {
-    	if ('\\' == pattern[index]) {
+        if ('\\' == pattern[index]) {
             elementArr->handleEscapeCharacter(pattern[index + 1]);
             index += 2;
-    	} else if ('-' == pattern[index + 1]) {
-    		for (char c = pattern[index]; c <= pattern[index + 2]; c++)
-    		    elementArr->setElement(c);
-    	    index += 3;
-    	} else {
-    		elementArr->setElement(pattern[index]);
-    		index += 1;
-    	}
+        } else if ('-' == pattern[index + 1]) {
+            for (char c = pattern[index]; c <= pattern[index + 2]; c++)
+                elementArr->setElement(c);
+            index += 3;
+        } else {
+            elementArr->setElement(pattern[index]);
+            index += 1;
+        }
     }
     nodeList.push_back(elementArr);
     return index;

@@ -14,6 +14,7 @@ class NFA {
 public:
 	NFA() = default;
 	~NFA() = default;
+    std::list<State*>& getStateList();
     State* getState(std::shared_ptr<Node> node);
 private:
 	using Substate = std::tuple<State*, State*>;

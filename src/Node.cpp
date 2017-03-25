@@ -1,5 +1,7 @@
 #include "Node.h"
 
+#include <exception>
+
 #include "SyntacticTree.h"
 #include "StateEdgePool.h"
 
@@ -252,7 +254,7 @@ void ElementNode::handleEscapeCharacter(char escapeCharacter) {
             setElement('-');
             break;
         default:
-            throw -1;
+            throw std::invalid_argument("ERROR TYPE");
     }
 }
 

@@ -1,5 +1,7 @@
 #include "PostfixExpressionVisitor.h"
-#include <iostream>
+
+#include <exception>
+
 namespace Regex {
 
 
@@ -42,7 +44,7 @@ void PostfixExpressionVisitor::visit(std::shared_ptr<ClosureNode> node) {
 }
 
 void PostfixExpressionVisitor::visit(std::shared_ptr<LeftBracket> node) {
-    throw -1;
+    throw std::invalid_argument("ERROR TYPE");;
 }
 
 void PostfixExpressionVisitor::visit(std::shared_ptr<CaptureNode> node) {
